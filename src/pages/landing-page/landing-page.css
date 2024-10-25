@@ -1,0 +1,209 @@
+.lnd-pg-bd {
+    min-height: 100dvh;
+    min-width: 100%;
+    background-image: url('/escena.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    /* This keeps the background static */
+
+    position: relative;
+}
+
+.rect-overlay {
+    position: absolute;
+    top: 0;
+    /* Align to top */
+    left: 0;
+    /* Align to left */
+    width: 100%;
+    /* Full width */
+    height: 100%;
+    /* Full height */
+    background-color: black;
+    /* Black background */
+    opacity: 0.5;
+    /* Set opacity */
+    z-index: 1;
+
+}
+
+
+
+.frwd2 {
+    z-index: 5;
+    position: relative;
+}
+
+.hero-txt {
+    display: flex;
+    /* Use flexbox */
+    justify-content: center;
+    /* Center horizontally */
+    align-items: center;
+    /* Center vertically */
+    height: 100dvh;
+    /* Make sure it takes full height of the parent */
+    width: 100%;
+    /* Make sure it takes full width of the parent */
+    color: white;
+
+}
+
+.hero-txt h1 {
+    color: #ffffff;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+    text-shadow:
+        1px 1px 0 #ccc,
+        3px 3px 0 #616161
+}
+
+
+.hero-txt p {
+    position: relative;
+    animation: slide-in 1s forwards;
+    /* Trigger animation */
+    visibility: hidden;
+    /* Hide initially */
+}
+
+/* New animation for the line */
+@keyframes show-line {
+    0% {
+        opacity: 0;
+    }
+
+    90% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 100%;
+    }
+}
+
+/* Animation keyframes */
+@keyframes slide-in {
+    0% {
+        transform: translateX(-100%);
+        /* Start off-screen */
+        visibility: visible;
+        /* Make visible when starting */
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(0);
+        /* End at original position */
+        visibility: visible;
+        /* Stay visible at the end */
+        opacity: 100%;
+    }
+}
+
+/* Specific animation delay for each line */
+.hero-txt p:nth-child(2) {
+    animation-delay: 0.5s;
+    /* Delay for the second line */
+}
+
+.hero-txt p:nth-child(3) {
+    animation-delay: 1s;
+    /* Delay for the third line */
+}
+
+.hero-txt-line {
+    height: 2.5rem;
+    width: 0.3rem;
+    background-color: #74A4CB;
+    margin: 5px;
+    border: none;
+    animation: show-line 1.5s forwards;
+    /* Trigger rotation animation */
+    animation-delay: 0s;
+    /* Start immediately */
+}
+
+.sermon-quiz-link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: fixed;
+    right: 2rem;
+    top: 60dvh;
+}
+
+.s-q-l-line {
+    height: 0.5rem;
+    width: 0.11rem;
+    background-color: white;
+    margin: 5px;
+    border: none;
+    animation: rotate-line 1.5s forwards;
+    animation-delay: 0s;
+}
+
+.sermon-logo,
+.bible-logo {
+    height: 3rem;
+    cursor: pointer;
+}
+
+
+
+@media (max-width:767px) {
+
+    /* Animation keyframes */
+    @keyframes slide-in {
+        0% {
+            transform: translateY(-100%);
+            /* Start off-screen */
+            visibility: visible;
+            /* Make visible when starting */
+            opacity: 0;
+        }
+
+        100% {
+            transform: translateY(0);
+            /* End at original position */
+            visibility: visible;
+            /* Stay visible at the end */
+            opacity: 100%;
+        }
+    }
+
+    .hero-txt p {
+        position: relative;
+        animation: slide-in 1s forwards;
+        /* Trigger animation */
+        visibility: hidden;
+        /* Hide initially */
+    }
+
+    /* Specific animation delay for each line */
+    .hero-txt p:nth-child(2) {
+        animation-delay: 0.5s;
+        /* Delay for the second line */
+    }
+
+    .hero-txt p:nth-child(3) {
+        animation-delay: 1s;
+        /* Delay for the third line */
+    }
+
+    .hero-txt {
+        flex-direction: column;
+        gap: 1px;
+        text-align: center;
+    }
+
+
+
+
+    .hero-txt-line {
+        transform: rotateZ(90deg);
+    }
+}

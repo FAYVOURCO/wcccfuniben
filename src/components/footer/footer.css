@@ -1,0 +1,93 @@
+
+.get-andriod-app{
+    background-color: white;
+    padding: 2rem 2rem;
+    text-align: center;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.grow{
+    color: #666666;
+}
+
+.dwnld-btn{
+    background-color: #87CEEB;
+    padding: 0.5rem 1rem;
+    width: 9rem;
+    border-radius: 0.5rem;
+}
+
+.dwnld-btn:hover{
+    background-color: #67c8ee;
+    cursor: pointer;
+}
+
+.dwnld-btn:active{
+    background-color: #67c8ee;
+}
+
+.social-media{
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    
+}
+
+.social-media-child{
+    background-color:  #44165A;
+    color: white;
+    padding: 1rem 2rem;
+    text-align: center;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 1rem;
+    width: 98%;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0);
+    margin-bottom: 2rem;
+}
+
+.social-links{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.social-icon{
+    height: 3rem;
+}
+
+.owner{
+    background-color: white;
+    padding: 0rem 2rem 2rem 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+}
+
+.wcccf{
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.wccrm-footer-logo{
+    height: 3rem;
+}
+
+
+.uniben{
+    color: #666666;
+}
+
+.copyright{
+    padding: 2rem 0rem 0rem 0rem;
+}

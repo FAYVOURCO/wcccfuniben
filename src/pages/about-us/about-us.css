@@ -1,0 +1,165 @@
+.about-us-container {
+    padding: 4rem 0rem 0rem;
+    min-height: 100vh;
+    /* Full height of the viewport */
+    max-height: 100dvh;
+    width: 100vw;
+    background:
+        linear-gradient(135deg, rgba(255, 0, 0, 0.3), rgba(0, 255, 0, 0.3)),
+        /* Painter stroke effect */
+        linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1));
+    /* Light overlay for splatter effect */
+    background-size: 150% 150%;
+    /* Make the gradient larger */
+    animation: animateBackground 5s ease infinite;
+    /* Animation for dynamic feel */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+ }
+
+.about-us-content {
+    z-index: 2;
+    /* Ensure content is above the background */
+    padding: 20px;
+    /* Add some padding */
+    text-align: center;
+    /* Center align text */
+    position: relative;
+    width: 100dvw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* New styles for card functionality */
+.card-container {
+    position: relative;
+    /* Allows absolute positioning of cards */
+    margin-top: 20px;
+    height: 200px;
+    /* Set a fixed height for the card container */
+    overflow: visible;
+    /* Allow cards to overflow for the pile effect */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    /* padding: 20px; */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    /* Allows for stacking */
+    width: 90%;
+    /* Set width to allow room for overlap */
+    left: 50%;
+    /* Center the card */
+     /* Adjust to center */
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    color: black;
+    transform: translateX(-50%);
+    width: 90dvw;
+    height: 80dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    overflow-y: scroll;
+    padding: 0rem 2rem;
+}
+
+
+
+/* Ensure the currently active card is fully visible */
+.card.active {
+    z-index: 1;
+    /* Bring active card to the front */
+    opacity: 1;
+    /* Fully visible */
+}
+
+/* Cards not currently active are slightly visible */
+.card:not(.active) {
+    opacity: 0;
+    /* Slightly transparent */
+}
+
+.sentence{
+    margin: 1rem 0rem;
+}
+ 
+
+
+.arrow {
+     border: none;
+    padding: 10px;
+    cursor: pointer;
+     font-size: 18px;
+     background-color: transparent;
+     font-size: 3rem;
+     background-color: rgba(26, 26, 26, 0.452);
+
+ }
+
+.left {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    z-index: 5;
+}
+
+.right {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    z-index: 5;
+}
+
+.arrow:hover {
+    background-color: rgba(26, 26, 26, 0.226);
+    /* Darker on hover */
+}
+
+.left:active, .right:active, .arrow:active{
+    background-color: rgba(26, 26, 26, 0.226);
+    color: white;
+    /* Darker on hover */
+}
+
+/* Animation for background */
+@keyframes animateBackground {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    50% {
+        background-position: 100% 100%;
+    }
+
+    100% {
+        background-position: 0% 0%;
+        /* Reverse back to the starting position */
+    }
+}
+
+/* Image styles */
+.card-image {
+    width: 20rem;
+    /* Make images responsive */
+    height: auto;
+    /* Maintain aspect ratio */
+    border-radius: 1rem;
+    /* Optional: Add rounded corners */
+    margin-top: 10px;
+    /* Space between text and image */
+}
+
+ /* Mobile styles (for screens up to 767px wide) */
+@media only screen and (max-width: 380px) {
+     .card{
+        font-size: small;
+     }
+  }

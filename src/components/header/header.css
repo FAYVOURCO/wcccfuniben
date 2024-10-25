@@ -1,0 +1,62 @@
+/* General styles */
+.wccrm-logo {
+    width: 3rem;
+}
+
+.header-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    position: relative;
+}
+
+.hamburger {
+    display: none;
+    cursor: pointer;
+    z-index: 2;
+}
+
+/* Styles for react-icons */
+.icon {
+    font-size: 2rem;
+    color: white;
+}
+
+.link-pages {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Hamburger menu and slide-in effect for phones */
+@media (max-width: 767px) {
+    .link-pages {
+        position: fixed;
+        top: 0;
+        right: -100%; /* Initially hidden off-screen */
+        height: 100vh;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.9); /* Dark overlay */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: right 0.3s ease; /* Sliding transition */
+    }
+
+    /* When menu is open */
+    .link-pages.open {
+        right: 0; /* Slides in from the right */
+    }
+
+    .link-pages p {
+        margin: 2rem 0;
+    }
+
+    /* Show the hamburger icon on small screens */
+    .hamburger {
+        display: block;
+    }
+}
