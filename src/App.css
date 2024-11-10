@@ -30,11 +30,14 @@
   width: 100%;
   top: 0;
   left: 0;
-  padding: 1rem 2rem;
+  padding: 0.5rem 2rem;
   color: white;
   transition: background-color 0.3s ease; /* Smooth transition for background color */
   border-radius: 0 0 2rem 2rem;
-}
+  /* display: flex;
+  justify-content: center;
+  flex-direction: column; */
+ }
 
 .frwd.black {
   background-color: rgba(0, 0, 0, 0.829); /* Slightly transparent black */

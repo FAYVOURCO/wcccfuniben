@@ -152,6 +152,55 @@
     cursor: pointer;
 }
 
+@media only screen and (max-width: 1024px) and (min-width: 768px) {
+      /* Animation keyframes */
+      @keyframes slide-in {
+        0% {
+            transform: translateY(-100%);
+            /* Start off-screen */
+            visibility: visible;
+            /* Make visible when starting */
+            opacity: 0;
+        }
+
+        100% {
+            transform: translateY(0);
+            /* End at original position */
+            visibility: visible;
+            /* Stay visible at the end */
+            opacity: 100%;
+        }
+    }
+
+    .hero-txt p {
+        position: relative;
+        animation: slide-in 1s forwards;
+        /* Trigger animation */
+        visibility: hidden;
+        /* Hide initially */
+    }
+
+    /* Specific animation delay for each line */
+    .hero-txt p:nth-child(2) {
+        animation-delay: 0.5s;
+        /* Delay for the second line */
+    }
+
+    .hero-txt p:nth-child(3) {
+        animation-delay: 1s;
+        /* Delay for the third line */
+    }
+
+    .hero-txt {
+        flex-direction: column;
+        gap: 1px;
+        text-align: center;
+    }
+
+    .hero-txt-line {
+        transform: rotateZ(90deg);
+    }
+  }
 
 
 @media (max-width:767px) {

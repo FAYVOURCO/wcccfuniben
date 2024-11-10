@@ -1,0 +1,227 @@
+.sermon-body {
+    margin: 0rem 1.5rem 10rem 1.5rem;
+    padding-top: 0.5rem;
+}
+
+.signin-form {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.877);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.no-match {
+    color: rgb(59, 59, 59);
+    font-style: italic;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+
+
+.loading-overlay {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* position: absolute; */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    background-color: rgba(0, 0, 0, 0.7);
+    width: 10rem;
+    height: 10rem;
+    border-radius: 5px;
+    text-align: center;
+    color: white;
+}
+
+.spinner2 {
+    width: 30px;
+    height: 30px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+.search-container {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    overflow: hidden;
+    width: 100%;
+    /* Adjust width as needed */
+    margin-bottom: 0.5rem;
+}
+
+
+.search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 8px 12px;
+    font-size: small;
+}
+
+.icon-container {
+    background-color: #f1f1f1;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-icon {
+    font-size: 16px;
+    color: #555;
+}
+
+.filter-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.filter-buttons button.active-filter {
+    background-color: #007BFF;
+    color: white;
+    font-weight: bold;
+}
+
+.filter-buttons button {
+    background-color: #F2F2F2;
+    border: none;
+    outline: none;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+}
+
+.sermon-list {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    display: flex;
+    gap: 0.5rem;
+}
+
+
+.image-card {
+    width: 100%;
+    height: 100%;
+    border-radius: 1rem;
+    background-color: rgb(230, 230, 230);
+}
+
+.image-card img {
+    border-radius: 1rem;
+    width: 100%;
+    height: 100%;
+}
+
+.sermon-item {
+    width: 20rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: left;
+    flex: 1 1 20rem;
+    /* Allow items to grow and shrink with a minimum width of 15rem */
+}
+
+.sermon-info {
+    width: 100%;
+}
+
+
+.audio-controls {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    background-color: white;
+    width: 100%;
+    padding: 0.5rem 1.5rem;
+    text-align: center;
+}
+
+.control-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.control-buttons button {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+}
+
+
+.rewind {
+    font-size: 1.5rem;
+}
+
+.ffw {
+    font-size: 1.5rem;
+
+}
+
+.pause {
+    font-size: 1.5rem;
+}
+
+.play {
+    font-size: 1.5rem;
+}
+
+.progress-bar input {
+    width: 100%;
+}
+
+.close-icon {
+    color: #E74C3C;
+    border-radius: 50%;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: -0.5rem;
+    right: 1rem;
+    cursor: pointer;
+    background-color: white;
+}
+
+.clear-icon {
+    color: #E74C3C;
+}

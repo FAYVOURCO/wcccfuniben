@@ -1,8 +1,8 @@
 .about-us-container {
     padding: 4rem 0rem 0rem;
-    min-height: 100vh;
+    height: 100vh;
     /* Full height of the viewport */
-    max-height: 100dvh;
+
     width: 100vw;
     background:
         linear-gradient(135deg, rgba(255, 0, 0, 0.3), rgba(0, 255, 0, 0.3)),
@@ -16,6 +16,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
  }
 
 .about-us-content {
@@ -47,14 +48,12 @@
 }
 
 .card {
-    background-color: rgba(255, 255, 255, 0.8);
+    /* background-color: rgba(255, 255, 255, 0.8); */
     border-radius: 8px;
     /* padding: 20px; */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    position: absolute;
+     position: absolute;
     /* Allows for stacking */
-    width: 90%;
-    /* Set width to allow room for overlap */
+     /* Set width to allow room for overlap */
     left: 50%;
     /* Center the card */
      /* Adjust to center */
@@ -62,8 +61,7 @@
     color: black;
     transform: translateX(-50%);
     width: 90dvw;
-    height: 80dvh;
-    display: flex;
+     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
@@ -105,14 +103,14 @@
  }
 
 .left {
-    position: absolute;
+    position: fixed;
     top: 50%;
     left: 0;
     z-index: 5;
 }
 
 .right {
-    position: absolute;
+    position: fixed;
     top: 50%;
     right: 0;
     z-index: 5;

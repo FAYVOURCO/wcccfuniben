@@ -1,0 +1,122 @@
+.signin-body {
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+    padding: 1rem;
+    border-radius: 0.3rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: centr;
+    width: 20rem;
+}
+
+.google-signin {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background-color: rgb(226, 226, 226);
+    border-radius: 0.3rem;
+    border: 1px solid rgb(204, 204, 204);
+    margin: 1rem;
+    width: 100%;
+}
+
+.credentials {
+    width: 100%;
+    text-align: left;
+}
+
+.credentials input {
+    width: 100%;
+    height: 2rem;
+    border: none;
+    outline: none;
+    padding: 1rem;
+    border-radius: 0.3rem;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* Inset shadow */
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    /* Smooth transitions */
+}
+
+.credentials input:focus {
+    outline: none;
+    /* Remove default outline */
+    border-color: #3b82f6;
+    /* Blue border on focus */
+    box-shadow: inset 0 2px 8px rgba(0, 123, 255, 0.2), 0 0 0 2px rgba(59, 130, 246, 0.5);
+    /* Blue shadow on focus */
+}
+
+.credentials input::placeholder {
+
+
+    color: #9ca3af;
+    /* Placeholder color */
+    opacity: 1;
+    /* Ensures placeholder is visible */
+
+}
+
+.credentials-forgot {
+    text-align: right;
+}
+
+.sign{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.password{
+    margin-bottom: 1rem;
+}
+
+.sign-button{
+    width: 100%;
+    border: none;
+    outline: none;
+    height: 2.5rem;
+    background-color: #616CD6;
+    color: white;
+     display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0.3rem;
+    margin-top: 1rem;
+    cursor: pointer;
+}
+
+.ahac{
+    color: #3b82f6;
+    cursor: pointer;
+    padding-left: 5px;
+    text-align: center;
+    text-align: right;
+ }
+
+.error-msg{
+    text-wrap: wrap;
+}
+
+.password-container{
+    position: relative;
+}
+
+.password-container span{
+    position: absolute;
+    right: 0.5rem;
+    top: 0.5rem;
+    cursor: pointer;
+}
+
+.reset-msg{
+    color: green;
+
+}
