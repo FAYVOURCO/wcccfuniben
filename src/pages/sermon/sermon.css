@@ -80,6 +80,9 @@
     margin-bottom: 0.5rem;
 }
 
+.filter-dropdowns{
+    margin: 0.5rem 0;
+}
 
 .search-input {
     flex: 1;
