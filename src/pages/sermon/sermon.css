@@ -64,8 +64,13 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 
@@ -80,7 +85,7 @@
     margin-bottom: 0.5rem;
 }
 
-.filter-dropdowns{
+.filter-dropdowns {
     margin: 0.5rem 0;
 }
 
@@ -227,4 +232,143 @@
 
 .clear-icon {
     color: #E74C3C;
+}
+
+.add-sermon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #28a745;
+    /* Green background */
+    border-radius: 50%;
+    /* Circular shape */
+    width: 3rem;
+    /* Width of the circle */
+    height: 3rem;
+    /* Height of the circle */
+    position: fixed;
+    right: 1rem;
+    top: 90%;
+
+}
+
+.add-sermon svg {
+    color: white;
+    /* White icon color */
+    font-size: 24px;
+    /* Icon size */
+}
+
+.add-sermon-modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    padding: 20px;
+}
+.add-sermon-modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    padding: 20px;
+}
+
+.add-sermon-modal-content {
+    background-color: #ffffff;
+    color: #333;
+    border-radius: 8px;
+    padding: 30px;
+    width: 100%;
+    max-width: 500px; /* Adjust the max width as needed */
+    max-height: 90vh; /* Set a maximum height based on viewport height */
+    overflow-y: auto; /* Enable scrolling if content exceeds the height */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.add-sermon-modal-content .close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #333;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.add-sermon-modal-content .close:hover {
+    color: #81007f; /* Brand color */
+}
+
+.add-sermon-modal-content h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.add-sermon-modal-content .form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.add-sermon-modal-content label {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.add-sermon-modal-content input[type="text"],
+.add-sermon-modal-content input[type="url"],
+.add-sermon-modal-content input[type="date"] {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 5px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+.add-sermon-modal-content input[type="text"]:focus,
+.add-sermon-modal-content input[type="url"]:focus,
+.add-sermon-modal-content input[type="date"]:focus {
+    border-color: #81007f; /* Brand color */
+    outline: none;
+}
+
+.add-sermon-modal-content button[type="submit"] {
+    background-color: rgb(235, 235, 235); /* Brand color */
+    color: black;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    width: 100%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.add-sermon-modal-content button[type="submit"]:hover {
+    background-color:rgb(196, 196, 196); /* Darker shade of brand color */
+}
+
+.add-sermon-modal-content button[type="submit"]:active {
+    background-color:rgb(196, 196, 196);
 }

@@ -3,9 +3,10 @@ import './sermon.css';
 import SignIn from '../../components/sign-in/SignIn';
 import { auth, db } from '../../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { FaPlay, FaPause, FaBackward, FaForward, FaSearch } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
+import { FaPlus } from 'react-icons/fa';
 import Fuse from 'fuse.js'; // Install Fuse.js for advanced search capabilities with 'npm install fuse.js'
 
 
@@ -26,6 +27,10 @@ const Sermon = () => {
     const [month, setMonth] = useState(""); // Selected month
     const [years, setYears] = useState([]); // Available years for dropdown
     const [months, setMonths] = useState([]); // Available months for dropdown
+    const [newSermon, setNewSermon] = useState({}); // New sermon data state
+    const [showModal, setShowModal] = useState(false); // Show modal for adding sermon
+    const [isAdmin, setIsAdmin] = useState(false); // State to track admin status
+
 
 
     useEffect(() => {
@@ -35,6 +40,7 @@ const Sermon = () => {
                     setUser(currentUser);
                     setIsEmailVerified(true);
                     fetchSermons();
+                    checkIfAdmin(currentUser.uid); // Check if the user is an admin
                 } else {
                     setIsEmailVerified(false);
                 }
@@ -49,27 +55,94 @@ const Sermon = () => {
 
     const fetchSermons = async () => {
         try {
-            setLoading(true); // Start loading
+            setLoading(true);
             const docRef = doc(db, 'sermonPage', 'sermons');
             const docSnap = await getDoc(docRef);
-
             if (docSnap.exists()) {
                 const sermonsData = docSnap.data();
                 const sortedSermons = Object.keys(sermonsData)
                     .map((key) => ({ id: key, ...sermonsData[key] }))
                     .sort((a, b) => new Date(b.dateReleased) - new Date(a.dateReleased));
-
                 setSermons(sortedSermons);
-                setFilteredSermons(sortedSermons); // Set initial filtered list
-                updateYearsAndMonths(sortedSermons); // Set years and months dynamically
+                setFilteredSermons(sortedSermons);
             } else {
-                console.log("No sermons document found!");
+                console.log("No sermons found!");
             }
         } catch (error) {
             console.error("Error fetching sermons:", error);
         } finally {
-            setLoading(false); // End loading
+            setLoading(false);
         }
+    };
+
+
+
+    const checkIfAdmin = async (userId) => {
+        try {
+            const userDoc = doc(db, 'users', userId); // Get the user document using the auth UID
+            const userSnapshot = await getDoc(userDoc);
+            if (userSnapshot.exists()) {
+                const userData = userSnapshot.data();
+                setIsAdmin(userData.isAdmin || false); // Set admin status based on Firestore data
+            } else {
+                console.log("User not found in Firestore");
+                setIsAdmin(false);
+            }
+        } catch (error) {
+            console.error('Error checking admin status:', error);
+            setIsAdmin(false); // Set to false in case of error
+        }
+    };
+
+    const handleAddSermonClick = () => {
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setNewSermon({}); // Reset the new sermon data
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setNewSermon({ ...newSermon, [name]: value });
+    };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const newSermonId = Date.now().toString(); // Generate a unique ID for the sermon
+
+        // Format the date as MM/DD/YYYY
+        const formattedDate = formatDate2(newSermon.dateReleased);
+
+        const newSermonWithFormattedDate = {
+            ...newSermon,
+            dateReleased: formattedDate, // Update the sermon with the formatted date
+        };
+
+        try {
+            // Get the reference to the existing 'sermons' document
+            const docRef = doc(db, 'sermonPage', 'sermons');
+
+            // Update the document by adding the new sermon map
+            await setDoc(docRef, {
+                [newSermonId]: newSermonWithFormattedDate, // Add new sermon with dynamic ID
+            }, { merge: true }); // Use merge to avoid overwriting the existing data
+
+            fetchSermons(); // Re-fetch the sermons after adding
+            handleCloseModal(); // Close the modal after submitting
+        } catch (error) {
+            console.error("Error adding sermon:", error);
+        }
+    };
+
+
+    // Helper function to format the date
+    const formatDate2 = (date) => {
+        const d = new Date(date);
+        const month = d.getMonth() + 1; // Months are 0-indexed, so we add 1
+        const day = d.getDate();
+        const year = d.getFullYear();
+        return `${month}/${day}/${year}`; // Return in MM/DD/YYYY format
     };
 
     // Dynamically get unique years and months from the sermons data
@@ -106,7 +179,7 @@ const Sermon = () => {
                 const [month, , releasedYear] = sermon.dateReleased.split('/');
                 return parseInt(releasedYear, 10) === parseInt(year);
             });
-        setSelectedFilter("All");
+            setSelectedFilter("All");
 
         }
 
@@ -121,7 +194,7 @@ const Sermon = () => {
                 const sermonMonthName = monthNames[parseInt(sermonMonth, 10) - 1];
                 return sermonMonthName === month;
             });
-        setSelectedFilter("All");
+            setSelectedFilter("All");
 
         }
 
@@ -329,12 +402,97 @@ const Sermon = () => {
 
     return (
         <div className='sermon-body'>
-            {/* {loading && (
-                <div className="loading-overlay">
-                    <div className="spinner"></div>
-                    <p>Loading sermons...</p>
+            {user && isAdmin && (
+                <div className="add-sermon">
+                    <FaPlus onClick={handleAddSermonClick} />
                 </div>
-            )} */}
+            )}
+
+            {/* Modal for adding sermon */}
+            {showModal && (
+                <div className="add-sermon-modal">
+                    <div className="add-sermon-modal-content">
+                        <button className="close" onClick={handleCloseModal}>
+                            <AiOutlineClose />
+                        </button>
+                        <h3>Add New Sermon</h3>
+                        <form onSubmit={handleSubmit}>
+                            {/* <div className="form-group">
+                                <label>Map Name (ID):</label>
+                                <input
+                                    type="text"
+                                    name="mapName"
+                                    value={newSermon.mapName || ""}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div> */}
+                            <div className="form-group">
+                                <label>Topic:</label>
+                                <input
+                                    type="text"
+                                    name="topic"
+                                    value={newSermon.topic || ""}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Minister:</label>
+                                <input
+                                    type="text"
+                                    name="minister"
+                                    value={newSermon.minister || ""}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Programme:</label>
+                                <input
+                                    type="text"
+                                    name="programme"
+                                    value={newSermon.programme || ""}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>URL:</label>
+                                <input
+                                    type="url"
+                                    name="sermonUrl"
+                                    value={newSermon.sermonUrl || ""}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Thumbnail URL:</label>
+                                <input
+                                    type="url"
+                                    name="thumbnailUrl"
+                                    value={newSermon.thumbnailUrl || ""}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Date Released:</label>
+                                <input
+                                    type="date"
+                                    name="dateReleased"
+                                    value={newSermon.dateReleased || ""}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                            <button type="submit">Add Sermon</button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
             {user && isEmailVerified ? (
                 <>
                     <div className="search-container">
@@ -457,6 +615,8 @@ const Sermon = () => {
                     <SignIn />
                 </div>
             )}
+
+
         </div>
     );
 
