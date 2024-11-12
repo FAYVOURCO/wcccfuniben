@@ -299,25 +299,33 @@
     position: relative;
 }
 
-.add-sermon-modal-content .close {
+.add-sermon-modal-content .frm-hd {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    position: sticky;
+    top: 0;
+    margin-bottom: 1rem;
+}
+
+.add-sermon-modal-content .frm-hd .close {
     background: none;
     border: none;
     font-size: 24px;
     color: #333;
-    position: absolute;
-    top: 10px;
-    right: 10px;
     cursor: pointer;
     transition: color 0.3s ease;
+    display: flex;
+    justify-content: center;
 }
 
-.add-sermon-modal-content .close:hover {
+.add-sermon-modal-content .frm-hd .close:hover {
     color: #81007f; /* Brand color */
 }
 
-.add-sermon-modal-content h3 {
+.add-sermon-modal-content .frm-hd h3 {
     font-size: 24px;
-    margin-bottom: 20px;
     font-weight: 500;
 }
 

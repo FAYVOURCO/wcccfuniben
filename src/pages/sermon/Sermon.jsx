@@ -145,6 +145,12 @@ const Sermon = () => {
         return `${month}/${day}/${year}`; // Return in MM/DD/YYYY format
     };
 
+    useEffect(() => {
+        if (sermons && sermons.length > 0) {
+            updateYearsAndMonths(sermons);
+        }
+    }, [sermons]);
+
     // Dynamically get unique years and months from the sermons data
     const updateYearsAndMonths = (sermons) => {
         const uniqueYears = new Set();
@@ -180,6 +186,7 @@ const Sermon = () => {
                 return parseInt(releasedYear, 10) === parseInt(year);
             });
             setSelectedFilter("All");
+            setSearchQuery(""); // Reset search query
 
         }
 
@@ -412,10 +419,14 @@ const Sermon = () => {
             {showModal && (
                 <div className="add-sermon-modal">
                     <div className="add-sermon-modal-content">
-                        <button className="close" onClick={handleCloseModal}>
-                            <AiOutlineClose />
-                        </button>
+                        <div className='frm-hd'>
+
                         <h3>Add New Sermon</h3>
+                            <button className="close" onClick={handleCloseModal}>
+                                <AiOutlineClose />
+                            </button>
+                            
+                        </div>
                         <form onSubmit={handleSubmit}>
                             {/* <div className="form-group">
                                 <label>Map Name (ID):</label>
