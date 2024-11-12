@@ -421,11 +421,11 @@ const Sermon = () => {
                     <div className="add-sermon-modal-content">
                         <div className='frm-hd'>
 
-                        <h3>Add New Sermon</h3>
+                            <h3>Add New Sermon</h3>
                             <button className="close" onClick={handleCloseModal}>
                                 <AiOutlineClose />
                             </button>
-                            
+
                         </div>
                         <form onSubmit={handleSubmit}>
                             {/* <div className="form-group">
@@ -460,16 +460,21 @@ const Sermon = () => {
                             </div>
                             <div className="form-group">
                                 <label>Programme:</label>
-                                <input
-                                    type="text"
+                                <select
                                     name="programme"
                                     value={newSermon.programme || ""}
                                     onChange={handleChange}
                                     required
-                                />
+                                >
+                                    <option value="">Select Programme</option>
+                                    <option value="Sunday Light">Sunday Light</option>
+                                    <option value="Charismatic Hour">Charismatic Hour</option>
+                                    <option value="Bible Study">Bible Study</option>
+                                    <option value="Other">Other</option>
+                                </select>
                             </div>
                             <div className="form-group">
-                                <label>URL:</label>
+                                <label>Sermon URL:</label>
                                 <input
                                     type="url"
                                     name="sermonUrl"

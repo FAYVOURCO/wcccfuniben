@@ -2,6 +2,9 @@
     margin: 0rem 1.5rem 10rem 1.5rem;
     padding-top: 0.5rem;
 }
+.sign-out{
+    cursor: pointer;
+}
 
 .signin-form {
     width: 100%;

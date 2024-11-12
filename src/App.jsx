@@ -14,16 +14,20 @@ const ScrollHandler = ({ setIsBlack }) => {
   const currentPath = location.pathname; // Extract the pathname
 
   const handleScroll = () => {
-    const heroText = document.querySelector('.hero-txt');
-    const heroTextBottom = heroText.getBoundingClientRect().bottom;
-    const threshold = window.innerHeight / 1;
-
-    // Check if the bottom of the hero text is near the top of the viewport
+    if (document.querySelector('.hero-txt')){
+      const heroText = document.querySelector('.hero-txt');
+      const heroTextBottom = heroText.getBoundingClientRect().bottom;
+      const threshold = window.innerHeight / 1;
+      // Check if the bottom of the hero text is near the top of the viewport
     if (heroTextBottom < threshold) {
       setIsBlack(true);
     } else {
       setIsBlack(false);
     }
+    }
+    
+
+    
   };
 
   const isAbout = () => {

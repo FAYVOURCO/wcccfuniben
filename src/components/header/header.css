@@ -1,4 +1,31 @@
 /* General styles */
+.signout-modal-overlay {
+    color: black;
+   position: fixed;
+   top: 0;
+   left: 0;
+   height: 100dvh;
+   width: 100%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   background-color: rgba(0, 0, 0, 0.7);
+   z-index: 1000;
+  }
+  
+  .signout-modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .signout-modal-content button {
+    margin: 5px;
+    padding: 0.5rem 1rem;
+  }
+  
+
 .wccrm-logo {
     width: 3rem;
 }
