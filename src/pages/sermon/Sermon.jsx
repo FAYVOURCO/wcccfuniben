@@ -8,6 +8,12 @@ import { FaPlay, FaPause, FaBackward, FaForward, FaSearch } from 'react-icons/fa
 import { AiOutlineClose } from 'react-icons/ai';
 import { FaPlus } from 'react-icons/fa';
 import Fuse from 'fuse.js'; // Install Fuse.js for advanced search capabilities with 'npm install fuse.js'
+import { FaDownload, FaTimes } from 'react-icons/fa'; // Font Awesome download icon
+import { FaEllipsisV } from 'react-icons/fa'; // Material Design horizontal three dots
+import { FaShare } from 'react-icons/fa'; // Font Awesome share alternative icon
+
+
+
 
 
 const Sermon = () => {
@@ -30,6 +36,8 @@ const Sermon = () => {
     const [newSermon, setNewSermon] = useState({}); // New sermon data state
     const [showModal, setShowModal] = useState(false); // Show modal for adding sermon
     const [isAdmin, setIsAdmin] = useState(false); // State to track admin status
+    const [activeSermonId, setActiveSermonId] = useState(null);
+
 
 
 
@@ -407,6 +415,10 @@ const Sermon = () => {
         }));
     };
 
+    const toggleMoreOptions = (sermonId) => {
+        setActiveSermonId(prevId => (prevId === sermonId ? null : sermonId));
+    };
+
     return (
         <div className='sermon-body'>
             {user && isAdmin && (
@@ -569,17 +581,37 @@ const Sermon = () => {
                                 <div
                                     key={sermon.id}
                                     className='sermon-item'
-                                    onClick={() => handlePlaySermon(sermon.sermonUrl, sermon)}
-                                    style={{ cursor: 'pointer' }}
+
                                 >
-                                    <div className='image-card'>
+                                    <div className='image-card'
+                                        onClick={() => handlePlaySermon(sermon.sermonUrl, sermon)}
+                                        style={{ cursor: 'pointer' }}>
                                         <img src={sermon.thumbnailUrl} alt={sermon.topic} />
                                     </div>
                                     <div className='sermon-info'>
-                                        <h3>{sermon.topic}</h3>
-                                        <p>{sermon.minister}</p>
-                                        <small>{formatDate(sermon.dateReleased)}</small>
+
+                                        <div className='abt-sermon'>
+                                            <h3>{sermon.topic}</h3>
+                                            <p>{sermon.minister}</p>
+                                            <small>{formatDate(sermon.dateReleased)}</small>
+                                        </div>
+
+                                        <div className="more">
+                                            <FaEllipsisV className='more-icon' onClick={() => toggleMoreOptions(sermon.id)} />
+                                        </div>
                                     </div>
+                                    {activeSermonId === sermon.id && (
+                                        <div className='more-options'>
+                                            <div
+                                                onClick={() => setActiveSermonId(null)}
+                                            ><FaTimes /> <small>Close</small></div>
+                                            <div><a
+                                                href={sermon.sermonUrl}
+                                                download
+                                                onClick={() => setActiveSermonId(null)} // Close options on click
+                                            ><FaDownload /><span>Download</span></a></div>
+                                            <div><FaShare /><span>Share</span></div>
+                                        </div>)}
                                 </div>
                             ))
                         ) : (
@@ -589,7 +621,10 @@ const Sermon = () => {
 
                     {currentAudio && (
                         <div className='audio-controls'>
-                            <p>Listening to: <strong>{sermonPlaying.topic}</strong> | {sermonPlaying.minister} </p>
+                             <div className='close-audio' onClick={handleRemoveCurrentAudio}>
+                                <AiOutlineClose className='close-icon' />
+                            </div>
+                            <p><strong>{sermonPlaying.topic}</strong> | {sermonPlaying.minister} </p>
                             <div className='control-buttons'>
                                 <button onClick={handleRewind}><FaBackward className='rewind' /></button>
                                 <button onClick={() => {
@@ -614,9 +649,16 @@ const Sermon = () => {
                                     onChange={handleProgressChange}
                                 />
                             </div>
-                            <div className='close-audio' onClick={handleRemoveCurrentAudio}>
-                                <AiOutlineClose className='close-icon' />
+
+                            <div className='sermon-ply-option'>
+                                <div><a
+                                    href={sermonPlaying.sermonUrl}
+                                    download
+                                    onClick={() => setActiveSermonId(null)} // Close options on click
+                                ><FaDownload /><span>Download</span></a></div>
+                                <div><FaShare /><span>Share</span></div>
                             </div>
+                           
                         </div>
                     )}
                     {loading && (
