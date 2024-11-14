@@ -10,7 +10,7 @@ import { FaPlus } from 'react-icons/fa';
 import Fuse from 'fuse.js'; // Install Fuse.js for advanced search capabilities with 'npm install fuse.js'
 import { FaDownload, FaTimes } from 'react-icons/fa'; // Font Awesome download icon
 import { FaEllipsisV } from 'react-icons/fa'; // Material Design horizontal three dots
-import { FaShare } from 'react-icons/fa'; // Font Awesome share alternative icon
+import { FaShare, FaWhatsapp, FaFacebook, FaTwitter, FaCopy, FaTrash, FaEdit } from 'react-icons/fa'; // Font Awesome share alternative icon
 
 
 
@@ -37,6 +37,9 @@ const Sermon = () => {
     const [showModal, setShowModal] = useState(false); // Show modal for adding sermon
     const [isAdmin, setIsAdmin] = useState(false); // State to track admin status
     const [activeSermonId, setActiveSermonId] = useState(null);
+    const [showSharePopup, setShowSharePopup] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedSermon, setEditedSermon] = useState({});
 
 
 
@@ -338,7 +341,10 @@ const Sermon = () => {
         audioPlayer.src = "";
         setCurrentAudio(null);
         setIsPlaying(false);
-        setProgress(0);
+        setProgress(0)
+        if (showSharePopup === true) {
+            setShowSharePopup(false);
+        }
     }
 
     const handleSearchChange = (e) => {
@@ -417,6 +423,69 @@ const Sermon = () => {
 
     const toggleMoreOptions = (sermonId) => {
         setActiveSermonId(prevId => (prevId === sermonId ? null : sermonId));
+    };
+
+    const handleShareClick = () => setShowSharePopup(!showSharePopup);
+
+
+    const handleCopyLink = () => {
+        navigator.clipboard.writeText(sermonPlaying.sermonUrl);
+        alert("Link copied to clipboard!");
+    };
+
+
+    const handleDeleteSermon = async (sermonId) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this sermon?");
+        if (confirmDelete) {
+            try {
+                const docRef = doc(db, 'sermonPage', 'sermons');
+                const sermonDoc = await getDoc(docRef);
+
+                if (sermonDoc.exists()) {
+                    const sermonData = sermonDoc.data();
+                    delete sermonData[sermonId]; // Remove the sermon from the data object
+
+                    await setDoc(docRef, sermonData); // Update Firestore with the new data
+                    setSermons((prevSermons) => prevSermons.filter(sermon => sermon.id !== sermonId));
+                    setFilteredSermons((prevFilteredSermons) => prevFilteredSermons.filter(sermon => sermon.id !== sermonId));
+                } else {
+                    console.log("No sermons found!");
+                }
+            } catch (error) {
+                console.error("Error deleting sermon:", error);
+            }
+        }
+    };
+
+    const handleEditClick = (sermon) => {
+        setIsEditing(true);
+        setEditedSermon(sermon); // Prepopulate the form with the selected sermon details
+    };
+
+    const handleUpdateSermon = async () => {
+        try {
+            const docRef = doc(db, 'sermonPage', 'sermons');
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const sermonsData = docSnap.data();
+                sermonsData[editedSermon.id] = { ...editedSermon }; // Update sermon details
+
+                await setDoc(docRef, sermonsData); // Save updates to Firestore
+                setSermons((prevSermons) =>
+                    prevSermons.map((sermon) => sermon.id === editedSermon.id ? editedSermon : sermon)
+                );
+                setFilteredSermons((prevFilteredSermons) =>
+                    prevFilteredSermons.map((sermon) => sermon.id === editedSermon.id ? editedSermon : sermon)
+                );
+            } else {
+                console.log("No sermons found!");
+            }
+
+            setIsEditing(false); // Close edit mode
+        } catch (error) {
+            console.error("Error updating sermon:", error);
+        }
     };
 
     return (
@@ -589,12 +658,36 @@ const Sermon = () => {
                                         <img src={sermon.thumbnailUrl} alt={sermon.topic} />
                                     </div>
                                     <div className='sermon-info'>
-
-                                        <div className='abt-sermon'>
-                                            <h3>{sermon.topic}</h3>
-                                            <p>{sermon.minister}</p>
-                                            <small>{formatDate(sermon.dateReleased)}</small>
-                                        </div>
+                                        {isEditing && editedSermon.id === sermon.id ? (
+                                            <div className='edit-form'>
+                                                <input
+                                                    type="text"
+                                                    value={editedSermon.topic}
+                                                    onChange={(e) => setEditedSermon({ ...editedSermon, topic: e.target.value })}
+                                                    placeholder="Sermon Topic"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={editedSermon.minister}
+                                                    onChange={(e) => setEditedSermon({ ...editedSermon, minister: e.target.value })}
+                                                    placeholder="Minister"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={editedSermon.sermonUrl}
+                                                    onChange={(e) => setEditedSermon({ ...editedSermon, sermonUrl: e.target.value })}
+                                                    placeholder="Minister"
+                                                />
+                                                <button onClick={handleUpdateSermon}>Save</button>
+                                                <button onClick={() => setIsEditing(false)}>Cancel</button>
+                                            </div>
+                                        ) : (
+                                            <div className='abt-sermon'>
+                                                <h3>{sermon.topic}</h3>
+                                                <p>{sermon.minister}</p>
+                                                <small>{formatDate(sermon.dateReleased)}</small>
+                                            </div>
+                                        )}
 
                                         <div className="more">
                                             <FaEllipsisV className='more-icon' onClick={() => toggleMoreOptions(sermon.id)} />
@@ -611,6 +704,14 @@ const Sermon = () => {
                                                 onClick={() => setActiveSermonId(null)} // Close options on click
                                             ><FaDownload /><span>Download</span></a></div>
                                             <div><FaShare /><span>Share</span></div>
+                                            {isAdmin && (
+                                                <>
+                                                    <div onClick={() => handleDeleteSermon(sermon.id)}><FaTrash /> Delete</div>
+                                                    <div onClick={() => handleEditClick(sermon)}>
+                                                        <FaEdit /><span>Edit</span>
+                                                    </div>
+                                                </>
+                                            )}
                                         </div>)}
                                 </div>
                             ))
@@ -621,7 +722,7 @@ const Sermon = () => {
 
                     {currentAudio && (
                         <div className='audio-controls'>
-                             <div className='close-audio' onClick={handleRemoveCurrentAudio}>
+                            <div className='close-audio' onClick={handleRemoveCurrentAudio}>
                                 <AiOutlineClose className='close-icon' />
                             </div>
                             <p><strong>{sermonPlaying.topic}</strong> | {sermonPlaying.minister} </p>
@@ -651,14 +752,36 @@ const Sermon = () => {
                             </div>
 
                             <div className='sermon-ply-option'>
+                                <div onClick={handleShareClick}><FaShare /><span>Share</span></div>
                                 <div><a
                                     href={sermonPlaying.sermonUrl}
                                     download
                                     onClick={() => setActiveSermonId(null)} // Close options on click
                                 ><FaDownload /><span>Download</span></a></div>
-                                <div><FaShare /><span>Share</span></div>
+
                             </div>
-                           
+
+                            {showSharePopup && (
+                                <div className='share-popup'>
+                                    <AiOutlineClose className='close-share-popup' onClick={handleShareClick} />
+                                    <p>Share on:</p>
+                                    <div className='share-options'>
+                                        <a href={`https://wa.me/?text=${sermonPlaying.sermonUrl}`} target="_blank" rel="noopener noreferrer">
+                                            <FaWhatsapp /> WhatsApp
+                                        </a>
+                                        <a href={`https://www.facebook.com/sharer/sharer.php?u=${sermonPlaying.sermonUrl}`} target="_blank" rel="noopener noreferrer">
+                                            <FaFacebook /> Facebook
+                                        </a>
+
+                                        <a href={`https://twitter.com/intent/tweet?url=${sermonPlaying.sermonUrl}`} target="_blank" rel="noopener noreferrer">
+                                            <FaTwitter /> X
+                                        </a>
+                                        <a href='#' onClick={handleCopyLink} rel="noopener noreferrer">
+                                            <FaCopy /> Copy Link
+                                        </a>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                     {loading && (
