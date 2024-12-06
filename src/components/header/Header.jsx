@@ -54,7 +54,7 @@ const Header = () => {
       <div className={`link-pages ${menuOpen ? 'open' : ''}`}>
         <p><Link to='/sermon' className='gen-link' onClick={toggleMenu}>Sermon</Link></p>
         <p><Link to='/prayer-library' className='gen-link' onClick={toggleMenu}>Prayer Library</Link></p>
-        <p><Link to='/bible-trivia' className='gen-link' onClick={toggleMenu}>Bible Trivia</Link></p>
+        {/* <p><Link to='/bible-trivia' className='gen-link' onClick={toggleMenu}>Bible Trivia</Link></p> */}
         <p><Link to='/about-us' className='gen-link' onClick={toggleMenu}>About Us</Link></p>
 
         {/* Conditionally render Sign Out if user is signed in */}

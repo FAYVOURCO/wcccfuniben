@@ -3,15 +3,15 @@ import './sermon.css';
 import SignIn from '../../components/sign-in/SignIn';
 import { auth, db } from '../../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { FaPlay, FaPause, FaBackward, FaForward, FaSearch } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 import { FaPlus } from 'react-icons/fa';
 import Fuse from 'fuse.js'; // Install Fuse.js for advanced search capabilities with 'npm install fuse.js'
 import { FaDownload, FaTimes } from 'react-icons/fa'; // Font Awesome download icon
 import { FaEllipsisV } from 'react-icons/fa'; // Material Design horizontal three dots
-import { FaShare, FaWhatsapp, FaFacebook, FaTwitter, FaCopy, FaTrash, FaEdit } from 'react-icons/fa'; // Font Awesome share alternative icon
-
+import { FaShare, FaWhatsapp, FaFacebook, FaTwitter, FaCopy, FaTrash, FaEdit, FaQuestion } from 'react-icons/fa'; // Font Awesome share alternative icon
+import GlobeIcon from '/globe.png'
 
 
 
@@ -40,6 +40,13 @@ const Sermon = () => {
     const [showSharePopup, setShowSharePopup] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editedSermon, setEditedSermon] = useState({});
+    const [quizQuestions, setQuizQuestions] = useState([]);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [isQuizOpen, setIsQuizOpen] = useState(false);
+    const [correctAnswers, setCorrectAnswers] = useState(0);
+    const [isQuizComplete, setIsQuizComplete] = useState(false);
+    const [sermonQuizId, setSermonQuizId] = useState("")
+    const [leaderBoard, setLeaderBoard] = useState([]);
 
 
 
@@ -63,6 +70,11 @@ const Sermon = () => {
 
         return () => unsubscribe();
     }, []);
+
+    // useEffect(()=>{
+    //     fetchSermons();
+
+    // },[currentAudio])
 
     const fetchSermons = async () => {
         try {
@@ -272,6 +284,7 @@ const Sermon = () => {
                 setIsPlaying(true);
                 setCurrentAudio(sermonUrl);
                 setSermonPlaying(sermon);
+                console.log(sermon)
             };
 
             audioPlayer.currentTime = 0;
@@ -283,6 +296,8 @@ const Sermon = () => {
             }
             setIsPlaying(!isPlaying);
         }
+
+        handleGetSermon(sermon.id);
     };
 
 
@@ -460,14 +475,18 @@ const Sermon = () => {
     const handleEditClick = (sermon) => {
         setIsEditing(true);
         setEditedSermon(sermon); // Prepopulate the form with the selected sermon details
+        setActiveSermonId(null)
     };
 
     const handleUpdateSermon = async () => {
+        const updateSermon = window.confirm("Are you sure you want to make these changes?");
+
+
         try {
             const docRef = doc(db, 'sermonPage', 'sermons');
             const docSnap = await getDoc(docRef);
 
-            if (docSnap.exists()) {
+            if (updateSermon && docSnap.exists()) {
                 const sermonsData = docSnap.data();
                 sermonsData[editedSermon.id] = { ...editedSermon }; // Update sermon details
 
@@ -487,6 +506,122 @@ const Sermon = () => {
             console.error("Error updating sermon:", error);
         }
     };
+
+    const handleGetSermon = async (sermonId) => {
+        setSermonQuizId(sermonId)
+        // console.log(quizQuestions)
+        try {
+            const docRef = doc(db, 'sermonPage', 'sermons');
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const sermonData = docSnap.data()[sermonId];
+                setLeaderBoard(Object.values(sermonData.leaderBoard || {})); // Assuming `quiz` contains the question
+            }
+        } catch (error) {
+            console.error("Error loading quiz:", error);
+        }
+    };
+
+
+    const handleOpenQuiz = async (sermonId) => {
+        setSermonQuizId(sermonId)
+        // console.log(quizQuestions)
+        try {
+            const docRef = doc(db, 'sermonPage', 'sermons');
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const sermonData = docSnap.data()[sermonId];
+                setQuizQuestions(Object.values(sermonData.Quiz || {})); // Assuming `quiz` contains the questions
+                setIsQuizOpen(true);
+                setCurrentQuestionIndex(0);
+                console.log('quiz')
+            }
+        } catch (error) {
+            console.error("Error loading quiz:", error);
+        }
+    };
+
+    const handleAnswer = (question, selectedAnswer) => {
+        let updatedCorrectAnswers = correctAnswers; // Local variable to track updated count
+
+        if (selectedAnswer === question.CorrectAnswer) {
+            updatedCorrectAnswers += 1; // Increment the local variable
+            // console.log(updatedCorrectAnswers)
+            setCorrectAnswers(updatedCorrectAnswers); // Update state asynchronously
+            alert("Correct!");
+        } else {
+            alert(`Incorrect! The correct answer is: ${question.CorrectAnswer}`);
+        }
+
+        // Move to the next question or mark quiz as complete
+        if (currentQuestionIndex < quizQuestions.length - 1) {
+            setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+        } else {
+            console.log()
+            setIsQuizComplete(true);
+            setIsQuizOpen(false); // Close the quiz modal
+            setCorrectAnswers(0)
+            saveQuizResult(updatedCorrectAnswers); // Save the result after the quiz ends
+        }
+    };
+
+    const saveQuizResult = async (updatedCorrectAnswers) => {
+        try {
+            if (!user) {
+                console.error("No authenticated user found.");
+                return;
+            }
+            // console.log(correctAnswers)
+            // Calculate percentage score
+            const percentageScore = Math.round((updatedCorrectAnswers / quizQuestions.length) * 100);
+
+            // Reference Firestore
+            const sermonRef = doc(db, "sermonPage", "sermons");
+            const sermonSnap = await getDoc(sermonRef);
+
+            if (!sermonSnap.exists()) {
+                throw new Error("Sermon not found!");
+            }
+
+            const sermonData = sermonSnap.data();
+            const sermonId = sermonQuizId;
+
+            // Check if leaderBoard exists
+            if (!sermonData[sermonId]?.leaderBoard) {
+                await updateDoc(sermonRef, {
+                    [`${sermonId}.leaderBoard`]: {}
+                });
+            }
+
+            // Generate unique map ID
+            const randomString = Math.random().toString(36).substring(2, 8);
+            const mapId = `${randomString}_${user.email.replace("@", "_").replace(".", "_")}`;
+
+            // Get current date and time
+            const now = new Date();
+            const date = `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()}`;
+            const time = now.toLocaleTimeString("en-US", { hour12: false });
+
+            // Save to Firestore
+            await updateDoc(sermonRef, {
+                [`${sermonId}.leaderBoard.${mapId}`]: {
+                    date,
+                    email: user.email,
+                    percentageScore,
+                    time,
+                    userId: user.uid
+                }
+            });
+
+            console.log("Quiz result saved successfully!");
+        } catch (error) {
+            console.error("Error saving quiz result:", error);
+        }
+    };
+
+
+
+
 
     return (
         <div className='sermon-body'>
@@ -652,11 +787,14 @@ const Sermon = () => {
                                     className='sermon-item'
 
                                 >
-                                    <div className='image-card'
+                                    {/* <div className='image-card'
                                         onClick={() => handlePlaySermon(sermon.sermonUrl, sermon)}
                                         style={{ cursor: 'pointer' }}>
-                                        <img src={sermon.thumbnailUrl} alt={sermon.topic} />
-                                    </div>
+                                        <img src={sermon.thumbnailUrl}
+                                            alt={sermon.topic}
+                                            loading='lazy' 
+                                        />
+                                    </div> */}
                                     <div className='sermon-info'>
                                         {isEditing && editedSermon.id === sermon.id ? (
                                             <div className='edit-form'>
@@ -676,23 +814,39 @@ const Sermon = () => {
                                                     type="text"
                                                     value={editedSermon.sermonUrl}
                                                     onChange={(e) => setEditedSermon({ ...editedSermon, sermonUrl: e.target.value })}
-                                                    placeholder="Minister"
+                                                    placeholder="SermonUrl"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={editedSermon.thumbnailUrl}
+                                                    onChange={(e) => setEditedSermon({ ...editedSermon, thumbnailUrl: e.target.value })}
+                                                    placeholder="thumbnailUrl"
+                                                />
+                                                <input
+                                                    type="date"
+                                                    value={editedSermon.dateReleased}
+                                                    onChange={(e) => setEditedSermon({ ...editedSermon, dateReleased: e.target.value })}
+                                                    placeholder="Date Released"
                                                 />
                                                 <button onClick={handleUpdateSermon}>Save</button>
                                                 <button onClick={() => setIsEditing(false)}>Cancel</button>
                                             </div>
                                         ) : (
-                                            <div className='abt-sermon'>
-                                                <h3>{sermon.topic}</h3>
-                                                <p>{sermon.minister}</p>
-                                                <small>{formatDate(sermon.dateReleased)}</small>
-                                            </div>
+                                            <>
+                                                <div className='abt-sermon' onClick={() => handlePlaySermon(sermon.sermonUrl, sermon)}>
+                                                    <h3 >{sermon.topic}</h3>
+                                                    <p>{sermon.minister}</p>
+                                                    <small>{formatDate(sermon.dateReleased)}</small>
+                                                </div>
+                                                <div className="more">
+                                                    <FaEllipsisV className='more-icon' onClick={() => toggleMoreOptions(sermon.id)} />
+                                                </div>
+                                            </>
                                         )}
 
-                                        <div className="more">
-                                            <FaEllipsisV className='more-icon' onClick={() => toggleMoreOptions(sermon.id)} />
-                                        </div>
+
                                     </div>
+
                                     {activeSermonId === sermon.id && (
                                         <div className='more-options'>
                                             <div
@@ -703,11 +857,15 @@ const Sermon = () => {
                                                 download
                                                 onClick={() => setActiveSermonId(null)} // Close options on click
                                             ><FaDownload /><span>Download</span></a></div>
-                                            <div><FaShare /><span>Share</span></div>
+                                            <div
+                                                onClick={() => handleOpenQuiz(sermon.id)}
+                                            ><FaQuestion /><span>Quiz</span></div>
+                                            {/* <div><FaShare /><span>Share</span></div> */}
                                             {isAdmin && (
                                                 <>
                                                     <div onClick={() => handleDeleteSermon(sermon.id)}><FaTrash /> Delete</div>
                                                     <div onClick={() => handleEditClick(sermon)}>
+
                                                         <FaEdit /><span>Edit</span>
                                                     </div>
                                                 </>
@@ -720,68 +878,159 @@ const Sermon = () => {
                         )}
                     </div>
 
+
+
+
                     {currentAudio && (
-                        <div className='audio-controls'>
-                            <div className='close-audio' onClick={handleRemoveCurrentAudio}>
-                                <AiOutlineClose className='close-icon' />
-                            </div>
-                            <p><strong>{sermonPlaying.topic}</strong> | {sermonPlaying.minister} </p>
-                            <div className='control-buttons'>
-                                <button onClick={handleRewind}><FaBackward className='rewind' /></button>
-                                <button onClick={() => {
-                                    if (isPlaying) {
-                                        audioPlayer.pause();
-                                    } else {
-                                        audioPlayer.play();
-                                    }
-                                    setIsPlaying(!isPlaying);
-                                }}>
-                                    {isPlaying ? <FaPause className='pause' /> : <FaPlay className='play' />}
-                                </button>
-                                <button onClick={handleFastForward}><FaForward className='ffw' /></button>
-                            </div>
+                        <div className='sermon-details-modal'>
 
-                            <div className='progress-bar'>
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={progress}
-                                    onChange={handleProgressChange}
-                                />
-                            </div>
 
-                            <div className='sermon-ply-option'>
-                                <div onClick={handleShareClick}><FaShare /><span>Share</span></div>
-                                <div><a
-                                    href={sermonPlaying.sermonUrl}
-                                    download
-                                    onClick={() => setActiveSermonId(null)} // Close options on click
-                                ><FaDownload /><span>Download</span></a></div>
+                            <div className='audio-controls'>
+                                <div className='close-audio' onClick={handleRemoveCurrentAudio}>
+                                    <AiOutlineClose className='close-icon' />
+                                </div>
+                                <p><strong>{sermonPlaying.topic}</strong> | {sermonPlaying.minister} </p>
+                                <div className='control-buttons'>
+                                    <button onClick={handleRewind}><FaBackward className='rewind' /></button>
+                                    <button onClick={() => {
+                                        if (isPlaying) {
+                                            audioPlayer.pause();
+                                        } else {
+                                            audioPlayer.play();
+                                        }
+                                        setIsPlaying(!isPlaying);
+                                    }}>
+                                        {isPlaying ? <FaPause className='pause' /> : <FaPlay className='play' />}
+                                    </button>
+                                    <button onClick={handleFastForward}><FaForward className='ffw' /></button>
+                                </div>
 
-                            </div>
+                                <div className='progress-bar'>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="100"
+                                        value={progress}
+                                        onChange={handleProgressChange}
+                                    />
+                                </div>
 
-                            {showSharePopup && (
-                                <div className='share-popup'>
-                                    <AiOutlineClose className='close-share-popup' onClick={handleShareClick} />
-                                    <p>Share on:</p>
-                                    <div className='share-options'>
-                                        <a href={`https://wa.me/?text=${sermonPlaying.sermonUrl}`} target="_blank" rel="noopener noreferrer">
-                                            <FaWhatsapp /> WhatsApp
-                                        </a>
-                                        <a href={`https://www.facebook.com/sharer/sharer.php?u=${sermonPlaying.sermonUrl}`} target="_blank" rel="noopener noreferrer">
-                                            <FaFacebook /> Facebook
-                                        </a>
+                                <div className='sermon-ply-option'>
+                                    {/* <div onClick={handleShareClick}><FaShare /><span>Share</span></div> */}
 
-                                        <a href={`https://twitter.com/intent/tweet?url=${sermonPlaying.sermonUrl}`} target="_blank" rel="noopener noreferrer">
-                                            <FaTwitter /> X
-                                        </a>
-                                        <a href='#' onClick={handleCopyLink} rel="noopener noreferrer">
-                                            <FaCopy /> Copy Link
-                                        </a>
+                                    <div><a
+                                        href={sermonPlaying.sermonUrl}
+                                        download
+                                        onClick={() => setActiveSermonId(null)} // Close options on click
+                                    ><FaDownload /><span>Download</span></a></div>
+                                    <div onClick={() => handleOpenQuiz(sermonPlaying.id)} className='take-quiz-btn'>Take Quiz</div>
+
+                                </div>
+
+                                {showSharePopup && (
+                                    <div className='share-popup'>
+                                        <AiOutlineClose className='close-share-popup' onClick={handleShareClick} />
+                                        <p>Share on:</p>
+                                        <div className='share-options'>
+                                            <a href={`https://wa.me/?text=${sermonPlaying.sermonUrl}`} target="_blank" rel="noopener noreferrer">
+                                                <FaWhatsapp /> WhatsApp
+                                            </a>
+                                            <a href={`https://www.facebook.com/sharer/sharer.php?u=${sermonPlaying.sermonUrl}`} target="_blank" rel="noopener noreferrer">
+                                                <FaFacebook /> Facebook
+                                            </a>
+
+                                            <a href={`https://twitter.com/intent/tweet?url=${sermonPlaying.sermonUrl}`} target="_blank" rel="noopener noreferrer">
+                                                <FaTwitter /> X
+                                            </a>
+                                            <a href='#' onClick={handleCopyLink} rel="noopener noreferrer">
+                                                <FaCopy /> Copy Link
+                                            </a>
+                                        </div>
                                     </div>
+                                )}
+                            </div>
+
+                            <div className="quiz-board">
+                                <br />
+                                <div className='quiz-board-hd-ctn'>
+                                    <h3 className='quiz-board-hd'>World Quiz Leader Board  </h3>
+                                    <img src={GlobeIcon} className='globe-icon' />
+                                </div>
+                            </div>
+                            <div className='leader-board'>
+                                {leaderBoard && Object.keys(leaderBoard).length > 0 ? (
+                                    Object.entries(leaderBoard)
+                                        .sort(([, a], [, b]) => {
+                                            // Sorting by score, date, and time as before
+                                            if (b.percentageScore !== a.percentageScore) {
+                                                return b.percentageScore - a.percentageScore;
+                                            }
+                                            const dateA = new Date(a.date);
+                                            const dateB = new Date(b.date);
+                                            if (dateA - dateB !== 0) {
+                                                return dateA - dateB;
+                                            }
+                                            const timeA = new Date(`${a.date}T${a.time}`);
+                                            const timeB = new Date(`${b.date}T${b.time}`);
+                                            return timeA - timeB;
+                                        })
+                                        .map(([mapId, leaderboardData], index) => {
+                                            // Ranking logic
+                                            const rank = index + 1;
+                                            const suffix = rank === 1 ? "st" : rank === 2 ? "nd" : rank === 3 ? "rd" : "th";
+
+                                            return (
+                                                <div className="leader-board-entry" key={mapId}>
+                                                    <h3 className='rank'>{rank}{suffix}</h3>
+                                                    <p><strong>Email:</strong> {leaderboardData.email}</p>
+                                                    <p><strong>Percentage Score:</strong> {leaderboardData.percentageScore}%</p>
+                                                    <p><strong>Time:</strong> {leaderboardData.time}</p>
+                                                    <p><strong>Date:</strong> {leaderboardData.date}</p>
+                                                </div>
+                                            );
+                                        })
+                                ) : (
+                                    <p className='no-leaders'>No Leaders yet, be the first to complete the quiz!</p> // Message to show if the leaderboard is empty
+                                )}
+                            </div>
+
+
+
+
+                            {isQuizOpen && (
+                                <div className="quiz-modal">
+                                    {/* <button onClick={() => setIsQuizOpen(false)}>Close Quiz</button> */}
+                                    <div className='times-ctn' ><div onClick={() => setIsQuizOpen(false)}><FaTimes /></div></div>
+                                    {quizQuestions.length > 0 ? (
+                                        currentQuestionIndex < quizQuestions.length ? (
+                                            <div className="quiz-question">
+                                                <h4>Question {currentQuestionIndex + 1}</h4>
+                                                <p>{quizQuestions[currentQuestionIndex].Question}</p>
+                                                <div className="options">
+                                                    {["OptionA", "OptionB", "OptionC", "OptionD"].map((optionKey) => (
+                                                        <button
+                                                            key={optionKey}
+                                                            onClick={() =>
+                                                                handleAnswer(
+                                                                    quizQuestions[currentQuestionIndex],
+                                                                    quizQuestions[currentQuestionIndex][optionKey]
+                                                                )
+                                                            }
+                                                        >
+                                                            {quizQuestions[currentQuestionIndex][optionKey]}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <p>Quiz Complete!</p>
+                                        )
+                                    ) : (
+                                        <p>No questions available for this quiz.</p>
+                                    )}
                                 </div>
                             )}
+
                         </div>
                     )}
                     {loading && (
