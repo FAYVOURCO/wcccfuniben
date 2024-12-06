@@ -47,7 +47,8 @@ const Sermon = () => {
     const [isQuizComplete, setIsQuizComplete] = useState(false);
     const [sermonQuizId, setSermonQuizId] = useState("")
     const [leaderBoard, setLeaderBoard] = useState([]);
-
+    const [feedbackMessage, setFeedbackMessage] = useState(""); // State for feedback message
+    const [showFinalScore, setShowFinalScore] = useState(false); // State to show final score
 
 
 
@@ -546,23 +547,34 @@ const Sermon = () => {
 
         if (selectedAnswer === question.CorrectAnswer) {
             updatedCorrectAnswers += 1; // Increment the local variable
-            // console.log(updatedCorrectAnswers)
             setCorrectAnswers(updatedCorrectAnswers); // Update state asynchronously
-            alert("Correct!");
+            setFeedbackMessage("Correct!"); // Set the correct feedback message
         } else {
-            alert(`Incorrect! The correct answer is: ${question.CorrectAnswer}`);
+            setFeedbackMessage(`Incorrect! The correct answer is: ${question.CorrectAnswer}`); // Set the incorrect feedback message
         }
 
         // Move to the next question or mark quiz as complete
-        if (currentQuestionIndex < quizQuestions.length - 1) {
-            setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
-        } else {
-            console.log()
-            setIsQuizComplete(true);
-            setIsQuizOpen(false); // Close the quiz modal
-            setCorrectAnswers(0)
-            saveQuizResult(updatedCorrectAnswers); // Save the result after the quiz ends
-        }
+        setTimeout(() => {
+            // Clear feedback message after a short delay when moving to the next question
+            setFeedbackMessage("");
+
+            if (currentQuestionIndex < quizQuestions.length - 1) {
+                setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+            } else {
+                setIsQuizComplete(true);
+                // setIsQuizOpen(false); 
+                // Close the quiz modal
+                setCorrectAnswers(0);
+                saveQuizResult(updatedCorrectAnswers); 
+                // Save the result after the quiz ends
+                setShowFinalScore(true)
+            }
+        }, 2000); // Clear feedback message after 2 seconds (or adjust the time as needed)
+    };
+
+    const handleQuizClose = () => {
+        setIsQuizOpen(false); // Close the quiz modal when "Okay" is clicked
+        setShowFinalScore(false)
     };
 
     const saveQuizResult = async (updatedCorrectAnswers) => {
@@ -574,6 +586,7 @@ const Sermon = () => {
             // console.log(correctAnswers)
             // Calculate percentage score
             const percentageScore = Math.round((updatedCorrectAnswers / quizQuestions.length) * 100);
+            
 
             // Reference Firestore
             const sermonRef = doc(db, "sermonPage", "sermons");
@@ -857,9 +870,9 @@ const Sermon = () => {
                                                 download
                                                 onClick={() => setActiveSermonId(null)} // Close options on click
                                             ><FaDownload /><span>Download</span></a></div>
-                                            <div
+                                            {/* <div
                                                 onClick={() => handleOpenQuiz(sermon.id)}
-                                            ><FaQuestion /><span>Quiz</span></div>
+                                            ><FaQuestion /><span>Quiz</span></div> */}
                                             {/* <div><FaShare /><span>Share</span></div> */}
                                             {isAdmin && (
                                                 <>
@@ -999,10 +1012,15 @@ const Sermon = () => {
 
                             {isQuizOpen && (
                                 <div className="quiz-modal">
-                                    {/* <button onClick={() => setIsQuizOpen(false)}>Close Quiz</button> */}
-                                    <div className='times-ctn' ><div onClick={() => setIsQuizOpen(false)}><FaTimes /></div></div>
+                                    {/* Close button */}
+                                    <div className='times-ctn'>
+                                        <div onClick={() => setIsQuizOpen(false)}>
+                                            <FaTimes />
+                                        </div>
+                                    </div>
+
                                     {quizQuestions.length > 0 ? (
-                                        currentQuestionIndex < quizQuestions.length ? (
+                                        currentQuestionIndex < quizQuestions.length && !showFinalScore ? (
                                             <div className="quiz-question">
                                                 <h4>Question {currentQuestionIndex + 1}</h4>
                                                 <p>{quizQuestions[currentQuestionIndex].Question}</p>
@@ -1021,9 +1039,22 @@ const Sermon = () => {
                                                         </button>
                                                     ))}
                                                 </div>
+
+                                                {/* Display the feedback message */}
+                                                {feedbackMessage && <div className="feedback-message">{feedbackMessage}</div>}
                                             </div>
                                         ) : (
-                                            <p>Quiz Complete!</p>
+                                            <div>
+                                                <p>Quiz Complete!</p>
+                                                {/* Render the results */}
+                                                {isQuizComplete && (
+                                                    <div>
+                                                        You got {correctAnswers} out of {quizQuestions.length} correct.
+                                                    </div>
+                                                )}
+                                                {/* "Okay" button to close the modal */}
+                                                <button onClick={handleQuizClose}>Okay</button>
+                                            </div>
                                         )
                                     ) : (
                                         <p>No questions available for this quiz.</p>
