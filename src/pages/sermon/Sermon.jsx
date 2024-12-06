@@ -10,7 +10,7 @@ import { FaPlus } from 'react-icons/fa';
 import Fuse from 'fuse.js'; // Install Fuse.js for advanced search capabilities with 'npm install fuse.js'
 import { FaDownload, FaTimes } from 'react-icons/fa'; // Font Awesome download icon
 import { FaEllipsisV } from 'react-icons/fa'; // Material Design horizontal three dots
-import { FaShare, FaWhatsapp, FaFacebook, FaTwitter, FaCopy, FaTrash, FaEdit, FaQuestion } from 'react-icons/fa'; // Font Awesome share alternative icon
+import { FaShare, FaWhatsapp, FaFacebook, FaTwitter, FaCopy, FaTrash, FaEdit, FaQuestion, FaChevronDown, FaChevronUp } from 'react-icons/fa'; // Font Awesome share alternative icon
 import GlobeIcon from '/globe.png'
 
 
@@ -49,6 +49,18 @@ const Sermon = () => {
     const [leaderBoard, setLeaderBoard] = useState([]);
     const [feedbackMessage, setFeedbackMessage] = useState(""); // State for feedback message
     const [showFinalScore, setShowFinalScore] = useState(false); // State to show final score
+    const [FeedbackColor, setFeedbackColor] = useState("")
+    const [minimiseCurrentAudio, setminimiseCurrentAudio] = useState(false)
+    const [userScore, setUserSCore] = useState('')
+    const [quizData, setQuizData] = useState([]);  // Store quiz data
+    const [newQuestion, setNewQuestion] = useState({
+        Question: '',
+        OptionA: '',
+        OptionB: '',
+        OptionC: '',
+        OptionD: '',
+        CorrectAnswer: '',
+    });
 
 
 
@@ -356,11 +368,15 @@ const Sermon = () => {
         audioPlayer.pause();
         audioPlayer.src = "";
         setCurrentAudio(null);
+        setminimiseCurrentAudio(false)
         setIsPlaying(false);
         setProgress(0)
         if (showSharePopup === true) {
             setShowSharePopup(false);
         }
+    }
+    const handleMinimiseCurrentAudio = () => {
+        setminimiseCurrentAudio(true)
     }
 
     const handleSearchChange = (e) => {
@@ -526,6 +542,7 @@ const Sermon = () => {
 
     const handleOpenQuiz = async (sermonId) => {
         setSermonQuizId(sermonId)
+        setLoading(true)
         // console.log(quizQuestions)
         try {
             const docRef = doc(db, 'sermonPage', 'sermons');
@@ -535,6 +552,7 @@ const Sermon = () => {
                 setQuizQuestions(Object.values(sermonData.Quiz || {})); // Assuming `quiz` contains the questions
                 setIsQuizOpen(true);
                 setCurrentQuestionIndex(0);
+                setLoading(false)
                 console.log('quiz')
             }
         } catch (error) {
@@ -549,8 +567,11 @@ const Sermon = () => {
             updatedCorrectAnswers += 1; // Increment the local variable
             setCorrectAnswers(updatedCorrectAnswers); // Update state asynchronously
             setFeedbackMessage("Correct!"); // Set the correct feedback message
+            setFeedbackColor("green")
         } else {
             setFeedbackMessage(`Incorrect! The correct answer is: ${question.CorrectAnswer}`); // Set the incorrect feedback message
+            setFeedbackColor("red")
+
         }
 
         // Move to the next question or mark quiz as complete
@@ -565,16 +586,17 @@ const Sermon = () => {
                 // setIsQuizOpen(false); 
                 // Close the quiz modal
                 setCorrectAnswers(0);
-                saveQuizResult(updatedCorrectAnswers); 
+                saveQuizResult(updatedCorrectAnswers);
                 // Save the result after the quiz ends
                 setShowFinalScore(true)
             }
-        }, 2000); // Clear feedback message after 2 seconds (or adjust the time as needed)
+        }, 2200); // Clear feedback message after 2 seconds (or adjust the time as needed)
     };
 
     const handleQuizClose = () => {
         setIsQuizOpen(false); // Close the quiz modal when "Okay" is clicked
         setShowFinalScore(false)
+        handleGetSermon(sermonQuizId)
     };
 
     const saveQuizResult = async (updatedCorrectAnswers) => {
@@ -586,7 +608,8 @@ const Sermon = () => {
             // console.log(correctAnswers)
             // Calculate percentage score
             const percentageScore = Math.round((updatedCorrectAnswers / quizQuestions.length) * 100);
-            
+            setUserSCore(percentageScore)
+
 
             // Reference Firestore
             const sermonRef = doc(db, "sermonPage", "sermons");
@@ -631,6 +654,7 @@ const Sermon = () => {
             console.error("Error saving quiz result:", error);
         }
     };
+
 
 
 
@@ -895,13 +919,25 @@ const Sermon = () => {
 
 
                     {currentAudio && (
-                        <div className='sermon-details-modal'>
+                        <div
+                            className={`sermon-details-modal ${minimiseCurrentAudio ? 'minimised' : 'maximised'}`}
+                        >
 
 
                             <div className='audio-controls'>
-                                <div className='close-audio' onClick={handleRemoveCurrentAudio}>
-                                    <AiOutlineClose className='close-icon' />
+                                <div className='audio-close-min-opt'>
+                                    <div className="minimise">
+                                        {
+
+                                            minimiseCurrentAudio ? <FaChevronUp onClick={() => setminimiseCurrentAudio(false)} /> : <FaChevronDown onClick={() => setminimiseCurrentAudio(true)} />
+
+                                        }
+                                    </div>
+                                    <div className='close-audio' onClick={handleRemoveCurrentAudio}>
+                                        <AiOutlineClose className='close-icon' />
+                                    </div>
                                 </div>
+
                                 <p><strong>{sermonPlaying.topic}</strong> | {sermonPlaying.minister} </p>
                                 <div className='control-buttons'>
                                     <button onClick={handleRewind}><FaBackward className='rewind' /></button>
@@ -936,7 +972,9 @@ const Sermon = () => {
                                         download
                                         onClick={() => setActiveSermonId(null)} // Close options on click
                                     ><FaDownload /><span>Download</span></a></div>
-                                    <div onClick={() => handleOpenQuiz(sermonPlaying.id)} className='take-quiz-btn'>Take Quiz</div>
+                                    <div onClick={() => handleOpenQuiz(sermonPlaying.id)} className='take-quiz-btn'><small>Take Quiz</small></div>
+                                    {/* <div onClick={() => handleOpenQuiz(sermonPlaying.id)} className='take-quiz-btn'><small>Edit Quiz</small></div> */}
+
 
                                 </div>
 
@@ -1014,7 +1052,8 @@ const Sermon = () => {
                                 <div className="quiz-modal">
                                     {/* Close button */}
                                     <div className='times-ctn'>
-                                        <div onClick={() => setIsQuizOpen(false)}>
+                                        <div onClick={() => {setIsQuizOpen(false)
+                                            handleQuizClose()}}>
                                             <FaTimes />
                                         </div>
                                     </div>
@@ -1024,58 +1063,72 @@ const Sermon = () => {
                                             <div className="quiz-question">
                                                 <h4>Question {currentQuestionIndex + 1}</h4>
                                                 <p>{quizQuestions[currentQuestionIndex].Question}</p>
-                                                <div className="options">
-                                                    {["OptionA", "OptionB", "OptionC", "OptionD"].map((optionKey) => (
-                                                        <button
-                                                            key={optionKey}
-                                                            onClick={() =>
-                                                                handleAnswer(
-                                                                    quizQuestions[currentQuestionIndex],
-                                                                    quizQuestions[currentQuestionIndex][optionKey]
-                                                                )
-                                                            }
-                                                        >
-                                                            {quizQuestions[currentQuestionIndex][optionKey]}
-                                                        </button>
-                                                    ))}
-                                                </div>
-
+                                                {!feedbackMessage ?
+                                                    <div className="options">
+                                                        {["OptionA", "OptionB", "OptionC", "OptionD"].map((optionKey) => (
+                                                            <div>
+                                                                <button
+                                                                    key={optionKey}
+                                                                    onClick={() =>
+                                                                        handleAnswer(
+                                                                            quizQuestions[currentQuestionIndex],
+                                                                            quizQuestions[currentQuestionIndex][optionKey]
+                                                                        )
+                                                                    }
+                                                                    className='quiz-btns'
+                                                                >
+                                                                    {quizQuestions[currentQuestionIndex][optionKey]}
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div > : <div className="feedback-msg" style={{ color: FeedbackColor }}>{feedbackMessage}</div>
+                                                }
                                                 {/* Display the feedback message */}
-                                                {feedbackMessage && <div className="feedback-message">{feedbackMessage}</div>}
+                                                {/* {feedbackMessage && <div className="feedback-message">{feedbackMessage}</div>} */}
                                             </div>
                                         ) : (
-                                            <div>
+                                            <div className='quiz-complete-fd'>
                                                 <p>Quiz Complete!</p>
                                                 {/* Render the results */}
                                                 {isQuizComplete && (
-                                                    <div>
-                                                        You got {correctAnswers} out of {quizQuestions.length} correct.
-                                                    </div>
+                                                    <p className='quiz-score'>
+                                                        {/* You got {correctAnswers} out of {quizQuestions.length} correct */}
+                                                         Your Score is {userScore}% 
+                                                    </p>
                                                 )}
                                                 {/* "Okay" button to close the modal */}
-                                                <button onClick={handleQuizClose}>Okay</button>
+                                                <button onClick={handleQuizClose} className='quiz-btns'>Okay</button>
                                             </div>
                                         )
                                     ) : (
-                                        <p>No questions available for this quiz.</p>
+                                        <p className='no-leaders'>No questions available for this quiz.</p>
                                     )}
                                 </div>
                             )}
 
                         </div>
                     )}
-                    {loading && (
+                    {/* {loading && (
                         <div className="loading-overlay">
                             <div className="spinner2"></div>
                             <p>Setting Up</p>
                         </div>
-                    )}
+                    )} */}
                 </>
             ) : (
                 <div className="signin-form">
                     <SignIn />
                 </div>
+
             )}
+            {
+                loading && (
+                    <div className="loading-overlay">
+                        <div className="spinner2"></div>
+                        <p>Setting Up</p>
+                    </div>
+                )
+            }
 
 
         </div>

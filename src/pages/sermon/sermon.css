@@ -49,7 +49,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 2;
+    z-index: 1001;
     background-color: rgba(0, 0, 0, 0.7);
     width: 10rem;
     height: 10rem;
@@ -289,6 +289,8 @@
     /* Animation added */
     z-index: 1001;
     overflow-y: scroll;
+    transition: transform 0.5s ease; /* Smooth transition for the transform property */
+
 }
 
 @keyframes slideUp {
@@ -301,6 +303,12 @@
         top: 0;
         /* Slide to the top (current position) */
     }
+}
+
+.minimised{
+transform: translateY(80dvh);
+
+ 
 }
 
 .abt-sermon {
@@ -356,6 +364,14 @@
     margin-right: 0.5rem;
 }
 
+ .audio-close-min-opt{
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+
 .control-buttons {
     display: flex;
     justify-content: center;
@@ -393,9 +409,8 @@
 }
 
 .close-audio {
-    width: 100%;
-    display: flex;
-    justify-content: right;
+     
+    
 }
 
 .leader-board {
@@ -428,8 +443,8 @@ margin: 16px;
 .take-quiz-btn {
     color: white;
     background-color: #007bff;
-    padding: 0.5rem 1rem;
-    width: 7rem;
+    padding: 0.2rem 0.5rem;
+    width: 6rem;
     border-radius: 0.5rem;
     /* position: fixed;
     bottom: 7rem;
@@ -677,9 +692,15 @@ margin: 16px;
 
 .quiz-question h4 {
     margin: 0;
+    text-align: center;
 }
 
-.options button {
+.quiz-question p {
+    margin: 0;
+    text-align: center;
+}
+
+.quiz-btns{
     margin: 5px;
     padding: 10px;
     border: none;
@@ -687,4 +708,28 @@ margin: 16px;
     color: white;
     cursor: pointer;
     border-radius: 4px;
+    width: 100%;
+}
+
+/* .options button {
+    margin: 5px;
+    padding: 10px;
+    border: none;
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    width: 100%;
+} */
+
+.quiz-complete-fd{
+    text-align: center;
+}
+
+.quiz-score{
+    color: #007BFF;
+}
+
+.feedback-msg{
+    text-align: center;
 }
