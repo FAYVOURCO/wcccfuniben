@@ -52,15 +52,7 @@ const Sermon = () => {
     const [FeedbackColor, setFeedbackColor] = useState("")
     const [minimiseCurrentAudio, setminimiseCurrentAudio] = useState(false)
     const [userScore, setUserSCore] = useState('')
-    const [quizData, setQuizData] = useState([]);  // Store quiz data
-    const [newQuestion, setNewQuestion] = useState({
-        Question: '',
-        OptionA: '',
-        OptionB: '',
-        OptionC: '',
-        OptionD: '',
-        CorrectAnswer: '',
-    });
+
 
 
 
@@ -551,6 +543,7 @@ const Sermon = () => {
                 const sermonData = docSnap.data()[sermonId];
                 setQuizQuestions(Object.values(sermonData.Quiz || {})); // Assuming `quiz` contains the questions
                 setIsQuizOpen(true);
+                setminimiseCurrentAudio(false)
                 setCurrentQuestionIndex(0);
                 setLoading(false)
                 console.log('quiz')
@@ -662,6 +655,7 @@ const Sermon = () => {
 
     return (
         <div className='sermon-body'>
+            <h1>Sermon</h1>
             {user && isAdmin && (
                 <div className="add-sermon">
                     <FaPlus onClick={handleAddSermonClick} />
@@ -973,7 +967,7 @@ const Sermon = () => {
                                         onClick={() => setActiveSermonId(null)} // Close options on click
                                     ><FaDownload /><span>Download</span></a></div>
                                     <div onClick={() => handleOpenQuiz(sermonPlaying.id)} className='take-quiz-btn'><small>Take Quiz</small></div>
-                                    {/* <div onClick={() => handleOpenQuiz(sermonPlaying.id)} className='take-quiz-btn'><small>Edit Quiz</small></div> */}
+                                    <div onClick={() => handleOpenQuiz(sermonPlaying.id)} className='take-quiz-btn'><small>Edit Quiz</small></div>
 
 
                                 </div>
@@ -1052,8 +1046,10 @@ const Sermon = () => {
                                 <div className="quiz-modal">
                                     {/* Close button */}
                                     <div className='times-ctn'>
-                                        <div onClick={() => {setIsQuizOpen(false)
-                                            handleQuizClose()}}>
+                                        <div onClick={() => {
+                                            setIsQuizOpen(false)
+                                            handleQuizClose()
+                                        }}>
                                             <FaTimes />
                                         </div>
                                     </div>
@@ -1093,7 +1089,7 @@ const Sermon = () => {
                                                 {isQuizComplete && (
                                                     <p className='quiz-score'>
                                                         {/* You got {correctAnswers} out of {quizQuestions.length} correct */}
-                                                         Your Score is {userScore}% 
+                                                        Your Score is {userScore}%
                                                     </p>
                                                 )}
                                                 {/* "Okay" button to close the modal */}
