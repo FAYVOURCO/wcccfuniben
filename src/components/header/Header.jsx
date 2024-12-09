@@ -9,6 +9,8 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [showModal, setShowModal] = useState(false); // State to control modal visibility
+
+
   const auth = getAuth();
   const navigate = useNavigate();
 
@@ -53,7 +55,7 @@ const Header = () => {
 
       <div className={`link-pages ${menuOpen ? 'open' : ''}`}>
         <p><Link to='/sermon' className='gen-link' onClick={toggleMenu}>Sermon</Link></p>
-        <p><Link to='/bible-trivia' className='gen-link' onClick={toggleMenu}>Bible Trivia</Link></p>
+        <p><Link to='/trivia' className='gen-link' onClick={toggleMenu}>Trivia</Link></p>
         <p><Link to='/prayer-library' className='gen-link' onClick={toggleMenu}>Prayer Library</Link></p>
         <p><Link to='/about-us' className='gen-link' onClick={toggleMenu}>About Us</Link></p>
 
@@ -73,6 +75,8 @@ const Header = () => {
           </div>
         </div>
       )}
+
+      
     </div>
   );
 };

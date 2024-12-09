@@ -10,9 +10,10 @@ import { FaPlus } from 'react-icons/fa';
 import Fuse from 'fuse.js'; // Install Fuse.js for advanced search capabilities with 'npm install fuse.js'
 import { FaDownload, FaTimes } from 'react-icons/fa'; // Font Awesome download icon
 import { FaEllipsisV } from 'react-icons/fa'; // Material Design horizontal three dots
-import { FaShare, FaWhatsapp, FaFacebook, FaTwitter, FaCopy, FaTrash, FaEdit, FaQuestion, FaChevronDown, FaChevronUp } from 'react-icons/fa'; // Font Awesome share alternative icon
-import GlobeIcon from '/globe.png'
-
+import { FaShare, FaWhatsapp, FaFacebook, FaTwitter, FaCopy, FaTrash, FaEdit, FaQuestion, FaChevronDown, FaChevronUp, FaBible } from 'react-icons/fa'; // Font Awesome share alternative icon
+import Spinner from '../../components/spinner/Spinner';
+import LeaderBoard from '../../components/LeaderBoard/LeaderBoard';
+import TriviaGame from '../../components/triviaGame/TriviaGame';
 
 
 
@@ -51,7 +52,8 @@ const Sermon = () => {
     const [showFinalScore, setShowFinalScore] = useState(false); // State to show final score
     const [FeedbackColor, setFeedbackColor] = useState("")
     const [minimiseCurrentAudio, setminimiseCurrentAudio] = useState(false)
-    const [userScore, setUserSCore] = useState('')
+    // const [userScore, setUserSCore] = useState('')
+
 
 
 
@@ -66,10 +68,12 @@ const Sermon = () => {
                     checkIfAdmin(currentUser.uid); // Check if the user is an admin
                 } else {
                     setIsEmailVerified(false);
+                    setLoading(false)
                 }
             } else {
                 setUser(null);
                 setIsEmailVerified(false);
+                setLoading(false)
             }
         });
 
@@ -183,7 +187,7 @@ const Sermon = () => {
     const updateYearsAndMonths = (sermons) => {
         const uniqueYears = new Set();
         const uniqueMonths = new Set();
-
+ 
         sermons.forEach(sermon => {
             const [month, , year] = sermon.dateReleased.split('/');
             uniqueYears.add(year);
@@ -302,8 +306,18 @@ const Sermon = () => {
             setIsPlaying(!isPlaying);
         }
 
-        handleGetSermon(sermon.id);
+        // handleGetLeaders(sermonPlaying.LeaderBoard)
+        // setSermonQuizId(sermonPlaying.id)
+        // setLeaderBoard(sermonPlaying.leaderBoard)
     };
+
+
+     
+    useEffect(() => {
+        setLeaderBoard(sermonPlaying.leaderBoard)
+                setSermonQuizId(sermonPlaying.id)
+
+    }, [sermonPlaying])
 
 
 
@@ -516,137 +530,148 @@ const Sermon = () => {
         }
     };
 
-    const handleGetSermon = async (sermonId) => {
-        setSermonQuizId(sermonId)
-        // console.log(quizQuestions)
-        try {
-            const docRef = doc(db, 'sermonPage', 'sermons');
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const sermonData = docSnap.data()[sermonId];
-                setLeaderBoard(Object.values(sermonData.leaderBoard || {})); // Assuming `quiz` contains the question
-            }
-        } catch (error) {
-            console.error("Error loading quiz:", error);
-        }
-    };
+    // const handleGetSermon = async (sermonId) => {
+    //     setSermonQuizId(sermonId)
+    //     // console.log(quizQuestions)
+    //     try {
+    //         const docRef = doc(db, 'sermonPage', 'sermons');
+    //         const docSnap = await getDoc(docRef);
+    //         if (docSnap.exists()) {
+    //             const sermonData = docSnap.data()[sermonId];
+    //             setLeaderBoard(Object.values(sermonData.leaderBoard || {})); // Assuming `quiz` contains the question
+    //         }
+    //     } catch (error) {
+    //         console.error("Error loading quiz:", error);
+    //     }
+    // };
 
 
     const handleOpenQuiz = async (sermonId) => {
-        setSermonQuizId(sermonId)
+        setSermonQuizId(sermonPlaying.id)
+        console.log(sermonPlaying.id)
         setLoading(true)
+        setQuizQuestions(Object.values(sermonPlaying.Quiz || {})); // Assuming `quiz` contains the questions
+        setIsQuizOpen(true);
+        setminimiseCurrentAudio(false)
+        setCurrentQuestionIndex(0);
+        setLoading(false)
+        console.log('quiz')
         // console.log(quizQuestions)
-        try {
-            const docRef = doc(db, 'sermonPage', 'sermons');
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const sermonData = docSnap.data()[sermonId];
-                setQuizQuestions(Object.values(sermonData.Quiz || {})); // Assuming `quiz` contains the questions
-                setIsQuizOpen(true);
-                setminimiseCurrentAudio(false)
-                setCurrentQuestionIndex(0);
-                setLoading(false)
-                console.log('quiz')
-            }
-        } catch (error) {
-            console.error("Error loading quiz:", error);
-        }
+        // try {
+        //     const docRef = doc(db, 'sermonPage', 'sermons');
+        //     const docSnap = await getDoc(docRef);
+        //     if (docSnap.exists()) {
+        //         const sermonData = docSnap.data()[sermonId];
+        //         setQuizQuestions(Object.values(sermonData.Quiz || {})); // Assuming `quiz` contains the questions
+        //         setIsQuizOpen(true);
+        //         setminimiseCurrentAudio(false)
+        //         setCurrentQuestionIndex(0);
+        //         setLoading(false)
+        //         console.log('quiz')
+        //     }
+        // } catch (error) {
+        //     console.error("Error loading quiz:", error);
+        // }
     };
 
-    const handleAnswer = (question, selectedAnswer) => {
-        let updatedCorrectAnswers = correctAnswers; // Local variable to track updated count
+    // const handleAnswer = (question, selectedAnswer) => {
+    //     let updatedCorrectAnswers = correctAnswers; // Local variable to track updated count
 
-        if (selectedAnswer === question.CorrectAnswer) {
-            updatedCorrectAnswers += 1; // Increment the local variable
-            setCorrectAnswers(updatedCorrectAnswers); // Update state asynchronously
-            setFeedbackMessage("Correct!"); // Set the correct feedback message
-            setFeedbackColor("green")
-        } else {
-            setFeedbackMessage(`Incorrect! The correct answer is: ${question.CorrectAnswer}`); // Set the incorrect feedback message
-            setFeedbackColor("red")
+    //     if (selectedAnswer === question.CorrectAnswer) {
+    //         updatedCorrectAnswers += 1; // Increment the local variable
+    //         setCorrectAnswers(updatedCorrectAnswers); // Update state asynchronously
+    //         setFeedbackMessage("Correct!"); // Set the correct feedback message
+    //         setFeedbackColor("green")
+    //     } else {
+    //         setFeedbackMessage(`Incorrect! The correct answer is: ${question.CorrectAnswer}`); // Set the incorrect feedback message
+    //         setFeedbackColor("red")
 
-        }
+    //     }
 
-        // Move to the next question or mark quiz as complete
-        setTimeout(() => {
-            // Clear feedback message after a short delay when moving to the next question
-            setFeedbackMessage("");
+    //     // Move to the next question or mark quiz as complete
+    //     setTimeout(() => {
+    //         // Clear feedback message after a short delay when moving to the next question
+    //         setFeedbackMessage("");
 
-            if (currentQuestionIndex < quizQuestions.length - 1) {
-                setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
-            } else {
-                setIsQuizComplete(true);
-                // setIsQuizOpen(false); 
-                // Close the quiz modal
-                setCorrectAnswers(0);
-                saveQuizResult(updatedCorrectAnswers);
-                // Save the result after the quiz ends
-                setShowFinalScore(true)
-            }
-        }, 2200); // Clear feedback message after 2 seconds (or adjust the time as needed)
-    };
+    //         if (currentQuestionIndex < quizQuestions.length - 1) {
+    //             setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+    //         } else {
+    //             setIsQuizComplete(true);
+    //             // setIsQuizOpen(false); 
+    //             // Close the quiz modal
+    //             setCorrectAnswers(0);
+    //             saveQuizResult(updatedCorrectAnswers);
+    //             // Save the result after the quiz ends
+    //             setShowFinalScore(true)
+    //         }
+    //     }, 2200); // Clear feedback message after 2 seconds (or adjust the time as needed)
+    // };
 
     const handleQuizClose = () => {
         setIsQuizOpen(false); // Close the quiz modal when "Okay" is clicked
         setShowFinalScore(false)
-        handleGetSermon(sermonQuizId)
     };
 
-    const saveQuizResult = async (updatedCorrectAnswers) => {
-        try {
-            if (!user) {
-                console.error("No authenticated user found.");
-                return;
-            }
-            // console.log(correctAnswers)
-            // Calculate percentage score
-            const percentageScore = Math.round((updatedCorrectAnswers / quizQuestions.length) * 100);
-            setUserSCore(percentageScore)
+    useEffect(() => {
+        setSermonQuizId(sermonPlaying.id)
+
+    }, [showFinalScore])
+
+    // const saveQuizResult = async (updatedCorrectAnswers) => {
+    //     try {
+    //         if (!user) {
+    //             console.error("No authenticated user found.");
+    //             return;
+    //         }
+    //         // console.log(correctAnswers)
+    //         // Calculate percentage score
+    //         const percentageScore = Math.round((updatedCorrectAnswers / quizQuestions.length) * 100);
+    //         setUserSCore(percentageScore)
 
 
-            // Reference Firestore
-            const sermonRef = doc(db, "sermonPage", "sermons");
-            const sermonSnap = await getDoc(sermonRef);
+    //         // Reference Firestore
+    //         const sermonRef = doc(db, "sermonPage", "sermons");
+    //         const sermonSnap = await getDoc(sermonRef);
 
-            if (!sermonSnap.exists()) {
-                throw new Error("Sermon not found!");
-            }
+    //         if (!sermonSnap.exists()) {
+    //             throw new Error("Sermon not found!");
+    //         }
 
-            const sermonData = sermonSnap.data();
-            const sermonId = sermonQuizId;
+    //         const sermonData = sermonSnap.data();
+    //         const sermonId = sermonQuizId;
 
-            // Check if leaderBoard exists
-            if (!sermonData[sermonId]?.leaderBoard) {
-                await updateDoc(sermonRef, {
-                    [`${sermonId}.leaderBoard`]: {}
-                });
-            }
+    //         // Check if leaderBoard exists
+    //         if (!sermonData[sermonId]?.leaderBoard) {
+    //             await updateDoc(sermonRef, {
+    //                 [`${sermonId}.leaderBoard`]: {}
+    //             });
+    //         }
 
-            // Generate unique map ID
-            const randomString = Math.random().toString(36).substring(2, 8);
-            const mapId = `${randomString}_${user.email.replace("@", "_").replace(".", "_")}`;
+    //         // Generate unique map ID
+    //         const randomString = Math.random().toString(36).substring(2, 8);
+    //         const mapId = `${randomString}_${user.email.replace("@", "_").replace(".", "_")}`;
 
-            // Get current date and time
-            const now = new Date();
-            const date = `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()}`;
-            const time = now.toLocaleTimeString("en-US", { hour12: false });
+    //         // Get current date and time
+    //         const now = new Date();
+    //         const date = `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()}`;
+    //         const time = now.toLocaleTimeString("en-US", { hour12: false });
 
-            // Save to Firestore
-            await updateDoc(sermonRef, {
-                [`${sermonId}.leaderBoard.${mapId}`]: {
-                    date,
-                    email: user.email,
-                    percentageScore,
-                    time,
-                    userId: user.uid
-                }
-            });
+    //         // Save to Firestore
+    //         await updateDoc(sermonRef, {
+    //             [`${sermonId}.leaderBoard.${mapId}`]: {
+    //                 date,
+    //                 email: user.email,
+    //                 percentageScore,
+    //                 time,
+    //                 userId: user.uid
+    //             }
+    //         });
 
-            console.log("Quiz result saved successfully!");
-        } catch (error) {
-            console.error("Error saving quiz result:", error);
-        }
-    };
+    //         console.log("Quiz result saved successfully!");
+    //     } catch (error) {
+    //         console.error("Error saving quiz result:", error);
+    //     }
+    // };
 
 
 
@@ -655,7 +680,7 @@ const Sermon = () => {
 
     return (
         <div className='sermon-body'>
-            <h1>Sermon</h1>
+            <h1 className='sermon-hd'>Sermon <FaBible/></h1>
             {user && isAdmin && (
                 <div className="add-sermon">
                     <FaPlus onClick={handleAddSermonClick} />
@@ -966,8 +991,8 @@ const Sermon = () => {
                                         download
                                         onClick={() => setActiveSermonId(null)} // Close options on click
                                     ><FaDownload /><span>Download</span></a></div>
-                                    <div onClick={() => handleOpenQuiz(sermonPlaying.id)} className='take-quiz-btn'><small>Take Quiz</small></div>
-                                    <div onClick={() => handleOpenQuiz(sermonPlaying.id)} className='take-quiz-btn'><small>Edit Quiz</small></div>
+                                    <div onClick={() => handleOpenQuiz(sermonPlaying.id)} className='take-quiz-btn'> Take Quiz </div>
+                                    {/* <div onClick={() => handleOpenQuiz(sermonPlaying.id)} className='take-quiz-btn'><small>Edit Quiz</small></div> */}
 
 
                                 </div>
@@ -995,14 +1020,8 @@ const Sermon = () => {
                                 )}
                             </div>
 
-                            <div className="quiz-board">
-                                <br />
-                                <div className='quiz-board-hd-ctn'>
-                                    <h3 className='quiz-board-hd'>World Quiz Leader Board  </h3>
-                                    <img src={GlobeIcon} className='globe-icon' />
-                                </div>
-                            </div>
-                            <div className='leader-board'>
+
+                            {/* <div className='leader-board'>
                                 {leaderBoard && Object.keys(leaderBoard).length > 0 ? (
                                     Object.entries(leaderBoard)
                                         .sort(([, a], [, b]) => {
@@ -1037,69 +1056,91 @@ const Sermon = () => {
                                 ) : (
                                     <p className='no-leaders'>No Leaders yet, be the first to complete the quiz!</p> // Message to show if the leaderboard is empty
                                 )}
-                            </div>
+                            </div> */}
+
+                            <LeaderBoard leaderBoard={leaderBoard} />
 
 
 
 
                             {isQuizOpen && (
-                                <div className="quiz-modal">
-                                    {/* Close button */}
-                                    <div className='times-ctn'>
-                                        <div onClick={() => {
-                                            setIsQuizOpen(false)
-                                            handleQuizClose()
-                                        }}>
-                                            <FaTimes />
-                                        </div>
-                                    </div>
 
-                                    {quizQuestions.length > 0 ? (
-                                        currentQuestionIndex < quizQuestions.length && !showFinalScore ? (
-                                            <div className="quiz-question">
-                                                <h4>Question {currentQuestionIndex + 1}</h4>
-                                                <p>{quizQuestions[currentQuestionIndex].Question}</p>
-                                                {!feedbackMessage ?
-                                                    <div className="options">
-                                                        {["OptionA", "OptionB", "OptionC", "OptionD"].map((optionKey) => (
-                                                            <div>
-                                                                <button
-                                                                    key={optionKey}
-                                                                    onClick={() =>
-                                                                        handleAnswer(
-                                                                            quizQuestions[currentQuestionIndex],
-                                                                            quizQuestions[currentQuestionIndex][optionKey]
-                                                                        )
-                                                                    }
-                                                                    className='quiz-btns'
-                                                                >
-                                                                    {quizQuestions[currentQuestionIndex][optionKey]}
-                                                                </button>
-                                                            </div>
-                                                        ))}
-                                                    </div > : <div className="feedback-msg" style={{ color: FeedbackColor }}>{feedbackMessage}</div>
-                                                }
-                                                {/* Display the feedback message */}
-                                                {/* {feedbackMessage && <div className="feedback-message">{feedbackMessage}</div>} */}
-                                            </div>
-                                        ) : (
-                                            <div className='quiz-complete-fd'>
-                                                <p>Quiz Complete!</p>
-                                                {/* Render the results */}
-                                                {isQuizComplete && (
-                                                    <p className='quiz-score'>
-                                                        {/* You got {correctAnswers} out of {quizQuestions.length} correct */}
-                                                        Your Score is {userScore}%
-                                                    </p>
-                                                )}
-                                                {/* "Okay" button to close the modal */}
-                                                <button onClick={handleQuizClose} className='quiz-btns'>Okay</button>
-                                            </div>
-                                        )
-                                    ) : (
-                                        <p className='no-leaders'>No questions available for this quiz.</p>
-                                    )}
+                                <div>
+                                    <TriviaGame
+                                        user={user}
+                                        quizQuestions={quizQuestions}
+                                        // currentQuestionIndex={currentQuestionIndex}
+                                        // showFinalScore={showFinalScore}
+                                        // isQuizComplete={isQuizComplete}
+                                        // userScore={userScore}
+                                        // handleAnswer={handleAnswer}
+                                        handleQuizClose={handleQuizClose}
+                                        // feedbackMessage={feedbackMessage}
+                                        // FeedbackColor={FeedbackColor}
+                                        // setIsQuizOpen={setIsQuizOpen}
+                                        // setSermonQuizId = {setSermonQuizId}
+                                        sermonPlaying={sermonPlaying}
+                                        collection = 'sermonPage'
+                                        document = 'sermons'
+                                    />
                                 </div>
+                                // <div className="quiz-modal">
+                                //     {/* Close button */}
+                                //     <div className='times-ctn'>
+                                //         <div onClick={() => {
+                                //             setIsQuizOpen(false)
+                                //             handleQuizClose()
+                                //         }}>
+                                //             <FaTimes />
+                                //         </div>
+                                //     </div>
+
+                                //     {quizQuestions.length > 0 ? (
+                                //         currentQuestionIndex < quizQuestions.length && !showFinalScore ? (
+                                //             <div className="quiz-question">
+                                //                 <h4>Question {currentQuestionIndex + 1}</h4>
+                                //                 <p>{quizQuestions[currentQuestionIndex].Question}</p>
+                                //                 {!feedbackMessage ?
+                                //                     <div className="options">
+                                //                         {["OptionA", "OptionB", "OptionC", "OptionD"].map((optionKey) => (
+                                //                             <div>
+                                //                                 <button
+                                //                                     key={optionKey}
+                                //                                     onClick={() =>
+                                //                                         handleAnswer(
+                                //                                             quizQuestions[currentQuestionIndex],
+                                //                                             quizQuestions[currentQuestionIndex][optionKey]
+                                //                                         )
+                                //                                     }
+                                //                                     className='quiz-btns'
+                                //                                 >
+                                //                                     {quizQuestions[currentQuestionIndex][optionKey]}
+                                //                                 </button>
+                                //                             </div>
+                                //                         ))}
+                                //                     </div > : <div className="feedback-msg" style={{ color: FeedbackColor }}>{feedbackMessage}</div>
+                                //                 }
+                                //                 {/* Display the feedback message */}
+                                //                 {/* {feedbackMessage && <div className="feedback-message">{feedbackMessage}</div>} */}
+                                //             </div>
+                                //         ) : (
+                                //             <div className='quiz-complete-fd'>
+                                //                 <p>Quiz Complete!</p>
+                                //                 {/* Render the results */}
+                                //                 {isQuizComplete && (
+                                //                     <p className='quiz-score'>
+                                //                         {/* You got {correctAnswers} out of {quizQuestions.length} correct */}
+                                //                         Your Score is {userScore}%
+                                //                     </p>
+                                //                 )}
+                                //                 {/* "Okay" button to close the modal */}
+                                //                 <button onClick={handleQuizClose} className='quiz-btns'>Okay</button>
+                                //             </div>
+                                //         )
+                                //     ) : (
+                                //         <p className='no-leaders'>No questions available for this quiz.</p>
+                                //     )}
+                                // </div>
                             )}
 
                         </div>
@@ -1119,10 +1160,7 @@ const Sermon = () => {
             )}
             {
                 loading && (
-                    <div className="loading-overlay">
-                        <div className="spinner2"></div>
-                        <p>Setting Up</p>
-                    </div>
+                    <Spinner />
                 )
             }
 

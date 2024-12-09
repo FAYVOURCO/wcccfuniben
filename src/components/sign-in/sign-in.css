@@ -9,6 +9,10 @@
     align-items: center;
     justify-content: centr;
     width: 20rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .google-signin {

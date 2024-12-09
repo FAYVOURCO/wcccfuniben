@@ -65,7 +65,7 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/sermon" element={<Sermon />} />
           <Route path="/prayer-library" element={<PrayerLibrary />} />
-          <Route path="/bible-trivia" element={<BibleTrivia />} />
+          <Route path="/trivia" element={<BibleTrivia />} />
           <Route path="/about-us" element={<AboutUs />} />
 
         </Routes>
