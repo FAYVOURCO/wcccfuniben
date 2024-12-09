@@ -55,7 +55,7 @@ const Header = () => {
 
       <div className={`link-pages ${menuOpen ? 'open' : ''}`}>
         <p><Link to='/sermon' className='gen-link' onClick={toggleMenu}>Sermon</Link></p>
-        <p><Link to='/trivia' className='gen-link' onClick={toggleMenu}>Trivia</Link></p>
+        <p><Link to='/trivia' className='gen-link' onClick={toggleMenu}>Quiz</Link></p>
         <p><Link to='/prayer-library' className='gen-link' onClick={toggleMenu}>Prayer Library</Link></p>
         <p><Link to='/about-us' className='gen-link' onClick={toggleMenu}>About Us</Link></p>
 
