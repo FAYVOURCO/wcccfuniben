@@ -54,6 +54,7 @@ const Header = () => {
       </div>
 
       <div className={`link-pages ${menuOpen ? 'open' : ''}`}>
+        <p><Link to='/' className='gen-link' onClick={toggleMenu}>Home</Link></p>
         <p><Link to='/sermon' className='gen-link' onClick={toggleMenu}>Sermon</Link></p>
         <p><Link to='/trivia' className='gen-link' onClick={toggleMenu}>Quiz</Link></p>
         <p><Link to='/prayer-library' className='gen-link' onClick={toggleMenu}>Prayer Library</Link></p>
@@ -76,7 +77,7 @@ const Header = () => {
         </div>
       )}
 
-      
+
     </div>
   );
 };

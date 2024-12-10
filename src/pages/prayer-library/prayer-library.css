@@ -1,8 +1,17 @@
-.sermon-body{
-    margin-top: 5rem;
+.prayer-lib-body {
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the content horizontally */
 }
 
-.signin-form{
+.prayer-lib-hd {
+    position: fixed;
+    top: 5rem;
+}
+
+.signin-form {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.877);
@@ -13,4 +22,21 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.drive-folder {
+    margin-top: 5rem;
+    width: 100%; /* Ensure full-width */
+    height: calc(100vh - 5rem); /* Adjust height to fit within viewport minus header */
+    display: flex;
+    justify-content: center; /* Center the iframe */
+    align-items: center;
+    overflow: hidden; /* Prevent any extra scrolling */
+}
+
+.drive-folder iframe {
+    width: 100%; /* Provide some padding from the edges */
+    height: 100%;
+    border: none;
+    max-width: 1200px; /* Optional: Set a max width for large screens */
 }

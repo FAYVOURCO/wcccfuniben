@@ -1,19 +1,19 @@
-import React,  { useEffect, useState }from 'react'
-import './prayer-library.css'
+import React, { useEffect, useState } from 'react';
+import './prayer-library.css';
 import SignIn from '../../components/sign-in/SignIn';
 import { auth } from '../.././firebase'; // Adjust the path if needed
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-
+import Spinner from '../../components/spinner/Spinner';
 
 const PrayerLibrary = () => {
     const [user, setUser] = useState(null); // To store the current user
     const [isEmailVerified, setIsEmailVerified] = useState(false); // To store email verification status
+    const [isLoading, setIsLoading] = useState(true); // Loading state for folder
 
     useEffect(() => {
         // Listen for authentication state changes
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             if (currentUser) {
-                // User is signed in
                 console.log("User is signed in:", currentUser);
                 if (currentUser.emailVerified) {
                     setUser(currentUser); // Set the user data
@@ -23,7 +23,6 @@ const PrayerLibrary = () => {
                     setIsEmailVerified(false);
                 }
             } else {
-                // User is signed out
                 console.log("No user is signed in");
                 setUser(null); // Reset the user data
                 setIsEmailVerified(false); // Reset email verification status
@@ -43,24 +42,30 @@ const PrayerLibrary = () => {
         }
     };
 
+    const handleIframeLoad = () => {
+        setIsLoading(false); // Stop showing spinner once iframe loads
+    };
+
     return (
-        <div className='sermon-body'>
-            <h1>Prayer Library</h1>
-            {user && isEmailVerified ? (
+        <div className='prayer-lib-body'>
+           
                 <>
-                    <p>Welcome, {user.email}! Your email is verified.</p>
-                    <button onClick={handleSignOut}>Sign Out</button>
-                </>
-            ) : (
-                <>
-                    <p>Please sign in or verify your email.</p>
-                    <div className='signin-form'>
-                        <SignIn />
+                    {isLoading && (
+                        <div className="spinner-container">
+                            <Spinner />
+                        </div>
+                    )}
+                    <div className="drive-folder" >
+                        <iframe
+                            src="https://drive.google.com/embeddedfolderview?id=16VJm1ILTvTunukKD18UPwguV-GvhSuWx#list"
+                            onLoad={handleIframeLoad}
+                            title="Prayer Library Folder"
+                        ></iframe>
                     </div>
                 </>
-            )}
+           
         </div>
     );
-}
+};
 
-export default PrayerLibrary
+export default PrayerLibrary;

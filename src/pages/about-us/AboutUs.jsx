@@ -32,43 +32,6 @@ const cardsData = [
             "Sunday Service (7:00am)"
         ],
         picture: ""
-    },
-    {
-        title: "General Supretendent",
-        content: [
-            "Pastor A.C Ohanebo",
-        ],
-        picture: ""
-    }, {
-        title: "Zonal Campus Coordinator",
-        content: [
-            "Pastor Osiriame O. Ediepo",
-        ],
-        picture: ""
-    } , {
-        title: "Campus Coordinator",
-        content: [
-            "Pastor Obed Ekenechukwu",
-        ],
-        picture: ""
-    } , {
-        title: "Assistant Campus Coordinator",
-        content: [
-            "Pastor Obinna Azubuguru",
-        ],
-        picture: ""
-    } , {
-        title: "Sister's Coordinator",
-        content: [
-            "Mama Sarah Ajoku",
-        ],
-        picture: ""
-    }, {
-        title: "Assitant Sister's Coordinator",
-        content: [
-            "Mama Blessing Momoh",
-        ],
-        picture: ""
     } 
 ];
 

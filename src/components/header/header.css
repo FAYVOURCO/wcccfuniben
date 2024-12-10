@@ -21,8 +21,10 @@
   }
   
   .signout-modal-content button {
-    margin: 5px;
-    padding: 0.5rem 1rem;
+    margin: 1rem;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 0.5rem;
   }
   
 

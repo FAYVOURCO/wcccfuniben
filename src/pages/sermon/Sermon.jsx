@@ -755,7 +755,7 @@ const Sermon = () => {
                                     required
                                 />
                             </div>
-                            <div className="form-group">
+                            {/* <div className="form-group">
                                 <label>Thumbnail URL:</label>
                                 <input
                                     type="url"
@@ -764,7 +764,7 @@ const Sermon = () => {
                                     onChange={handleChange}
                                     required
                                 />
-                            </div>
+                            </div> */}
                             <div className="form-group">
                                 <label>Date Released:</label>
                                 <input
@@ -1153,9 +1153,9 @@ const Sermon = () => {
                     )} */}
                 </>
             ) : (
-                <div className="signin-form">
+                
                     <SignIn />
-                </div>
+                
 
             )}
             {

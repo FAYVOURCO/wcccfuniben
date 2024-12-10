@@ -150,152 +150,155 @@ const SignIn = () => {
   }, []);
 
   return (
-    <div className='signin-body'>
-      {/* Show elements only if not in forgot password mode */}
+    <div className='signin-ctn'><div className='signin-body'>
+    {/* Show elements only if not in forgot password mode */}
+    {!isForgotPassword && (
+      <>
+        <h2>{isSignUp ? 'Sign Up With' : 'Sign In With'}</h2>
+        <div className='google-signin' onClick={signInWithGoogle} disabled={loadingGoogle}>
+          {loadingGoogle ? <p>Loading...</p> : <><FcGoogle /><p>Google</p></>}
+        </div>
+        <p className='or'>or</p>
+      </>
+    )}
+
+    <div className='credentials'>
+      <p>Email</p>
+      <input
+        type="email"
+        placeholder="jay@gmail.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={loadingEmail || loadingGoogle}
+      />
+
       {!isForgotPassword && (
         <>
-          <h2>{isSignUp ? 'Sign Up With' : 'Sign In With'}</h2>
-          <div className='google-signin' onClick={signInWithGoogle} disabled={loadingGoogle}>
-            {loadingGoogle ? <p>Loading...</p> : <><FcGoogle /><p>Google</p></>}
+          <div className='credentials-forgot'>
+            <small className='ahac' onClick={() => {
+              setIsForgotPassword(true)
+              setError(null);
+              email && setEmail(''); // Clear the email field
+              password && setPassword(''); // Clear the password field
+              confirmPassword && setConfirmPassword(''); // Clear the confirm password field
+              resetEmailSent && setResetEmailSent(false); // Reset the reset email sent flag
+
+            }}>
+              Forgot Password?
+            </small>
           </div>
-          <p className='or'>or</p>
+
+          <p>Password</p>
+
+          <div className="password-container">
+            <input
+              type={showPassword ? "text" : "password"}  // Dynamically set input type for confirm password                placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className='password'
+              disabled={loadingEmail || loadingGoogle}
+            />
+
+            <span onClick={() => setShowPassword(!showPassword)}>
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
+
+          {isSignUp && (
+            <>
+              <p>Confirm Password</p>
+              <div className="password-container">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}  // Dynamically set input type for confirm password                    placeholder="Confirm your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={loadingEmail || loadingGoogle}
+                />
+                <span onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                  {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
+              </div>
+
+            </>
+          )}
         </>
       )}
 
-      <div className='credentials'>
-        <p>Email</p>
-        <input
-          type="email"
-          placeholder="jay@gmail.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={loadingEmail || loadingGoogle}
-        />
-
-        {!isForgotPassword && (
-          <>
-            <div className='credentials-forgot'>
-              <small className='ahac' onClick={() => {
-                setIsForgotPassword(true)
-                setError(null);
-                email && setEmail(''); // Clear the email field
-                password && setPassword(''); // Clear the password field
-                confirmPassword && setConfirmPassword(''); // Clear the confirm password field
-                resetEmailSent && setResetEmailSent(false); // Reset the reset email sent flag
-
-              }}>
-                Forgot Password?
-              </small>
-            </div>
-
-            <p>Password</p>
-
-            <div className="password-container">
-              <input
-                type={showPassword ? "text" : "password"}  // Dynamically set input type for confirm password                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className='password'
-                disabled={loadingEmail || loadingGoogle}
-              />
-
-              <span onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </span>
-            </div>
-
-            {isSignUp && (
-              <>
-                <p>Confirm Password</p>
-                <div className="password-container">
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}  // Dynamically set input type for confirm password                    placeholder="Confirm your password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    disabled={loadingEmail || loadingGoogle}
-                  />
-                  <span onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                  </span>
-                </div>
-
-              </>
-            )}
-          </>
-        )}
-
-        {isForgotPassword && (
-          <div>
-            {resetEmailSent ? (
-              <small className='reset-msg'>Password reset email sent! Please check your inbox.</small>
-            ) : (
-              <>
-                <div onClick={handleForgotPassword} disabled={loadingEmail} className='sign-button'>
-                  {loadingEmail ? 'Sending Reset Email...' : 'Send Reset Email'}
-                </div>
-              </>
-            )}
-            <small onClick={() => {
-              setIsForgotPassword(false)
-              setError(null);
-              email && setEmail(''); // Clear the email field
-              password && setPassword(''); // Clear the password field
-              confirmPassword && setConfirmPassword(''); // Clear the confirm password field
-              resetEmailSent && setResetEmailSent(false); // Reset the reset email sent flag
-
-            }} className='ahac'>
-
-              <p>Back to Sign In</p>
-            </small>
-          </div>
-        )}
-      </div>
-
-      {/* Hide the sign-up/sign-in buttons if in forgot password mode */}
-      <div className='sign'>
-        {!isForgotPassword && (
-          <>
-            {isSignUp ? (
-              <div onClick={() => {
-                signUpWithEmail()
-                setError(null);
-              }} className='sign-button' disabled={loadingEmail}>
-                {loadingEmail ? 'Signing Up...' : 'Sign Up'}
-              </div>
-            ) : (
-              <div onClick={() => {
-                signInWithEmail()
-                setError(null);
-
-              }} className='sign-button' disabled={loadingEmail}>
-                {loadingEmail ? 'Signing In...' : 'Sign In'}
-              </div>
-            )}
-          </>
-        )}
-
-        {error && <small style={{ color: 'red' }} className='error-msg'>{error}</small>}
-      </div>
-
-      {/* Hide the sign-up/sign-in toggle when in forgot password mode */}
-      {!isForgotPassword && (
+      {isForgotPassword && (
         <div>
-          <p>
-            {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-            <small onClick={() => {
-              setIsSignUp(!isSignUp)
-              setError(null);
-              email && setEmail(''); // Clear the email field
-              password && setPassword(''); // Clear the password field
-              confirmPassword && setConfirmPassword(''); // Clear the confirm password field
-              resetEmailSent && setResetEmailSent(false); // Reset the reset email sent flag
-            }} className='ahac'>
-              {isSignUp ? 'Sign In' : 'Sign Up'}
-            </small>
-          </p>
+          {resetEmailSent ? (
+            <small className='reset-msg'>Password reset email sent! Please check your inbox.</small>
+          ) : (
+            <>
+              <div onClick={handleForgotPassword} disabled={loadingEmail} className='sign-button'>
+                {loadingEmail ? 'Sending Reset Email...' : 'Send Reset Email'}
+              </div>
+            </>
+          )}
+          <small onClick={() => {
+            setIsForgotPassword(false)
+            setError(null);
+            email && setEmail(''); // Clear the email field
+            password && setPassword(''); // Clear the password field
+            confirmPassword && setConfirmPassword(''); // Clear the confirm password field
+            resetEmailSent && setResetEmailSent(false); // Reset the reset email sent flag
+
+          }} className='ahac'>
+
+            <p>Back to Sign In</p>
+          </small>
         </div>
       )}
     </div>
+
+    {/* Hide the sign-up/sign-in buttons if in forgot password mode */}
+    <div className='sign'>
+      {!isForgotPassword && (
+        <>
+          {isSignUp ? (
+            <div onClick={() => {
+              signUpWithEmail()
+              setError(null);
+            }} className='sign-button' disabled={loadingEmail}>
+              {loadingEmail ? 'Signing Up...' : 'Sign Up'}
+            </div>
+          ) : (
+            <div onClick={() => {
+              signInWithEmail()
+              setError(null);
+
+            }} className='sign-button' disabled={loadingEmail}>
+              {loadingEmail ? 'Signing In...' : 'Sign In'}
+            </div>
+          )}
+        </>
+      )}
+
+      {error && <small style={{ color: 'red' }} className='error-msg'>{error}</small>}
+    </div>
+
+    {/* Hide the sign-up/sign-in toggle when in forgot password mode */}
+    {!isForgotPassword && (
+      <div>
+        <p>
+          {isSignUp ? 'Already have an account?' : "Don't have an account?"}
+          <small onClick={() => {
+            setIsSignUp(!isSignUp)
+            setError(null);
+            email && setEmail(''); // Clear the email field
+            password && setPassword(''); // Clear the password field
+            confirmPassword && setConfirmPassword(''); // Clear the confirm password field
+            resetEmailSent && setResetEmailSent(false); // Reset the reset email sent flag
+          }} className='ahac'>
+            {isSignUp ? 'Sign In' : 'Sign Up'}
+          </small>
+        </p>
+      </div>
+    )}
+  </div>
+
+     </div> 
+    
   );
 };
 
