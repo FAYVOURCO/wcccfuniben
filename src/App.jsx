@@ -8,6 +8,7 @@ import Sermon from './pages/sermon/Sermon';
 import PrayerLibrary from './pages/prayer-library/PrayerLibrary';
 import BibleTrivia from './pages/bible-trivia/BibleTrivia';
 import FourOFour from './pages/404/404';
+import EditQuizPage from './pages/EditQuiz/EditQuizPage';
 
 const ScrollHandler = ({ setIsBlack }) => {
   const location = useLocation(); // Get the current location object
@@ -67,7 +68,7 @@ function App() {
           <Route path="/prayer-library" element={<PrayerLibrary />} />
           <Route path="/trivia" element={<BibleTrivia />} />
           <Route path="/about-us" element={<AboutUs />} />
-
+          <Route path="/edit-quiz/:sermonId" element={<EditQuizPage />} />
         </Routes>
       </div>
     </Router>

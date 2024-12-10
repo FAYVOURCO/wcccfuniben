@@ -131,7 +131,7 @@
 
 .filter-buttons button.active-filter {
     background-color: #74A4CB;
-    color: black;
+    color: white;
     font-weight: bold;
 }
 
@@ -142,6 +142,7 @@
     padding: 0.5rem;
     border-radius: 0.5rem;
     font-weight: 600;
+    color: black;
 }
 
 .sermon-list {
@@ -581,9 +582,9 @@ transform: translateY(80dvh);
 }
 
 .add-sermon-modal-content button[type="submit"] {
-    background-color: rgb(235, 235, 235);
+    background-color:  #74A4CB;
     /* Brand color */
-    color: black;
+    color: white;
     padding: 12px 20px;
     border: none;
     border-radius: 6px;

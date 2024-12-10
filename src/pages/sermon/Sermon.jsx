@@ -10,14 +10,21 @@ import { FaPlus } from 'react-icons/fa';
 import Fuse from 'fuse.js'; // Install Fuse.js for advanced search capabilities with 'npm install fuse.js'
 import { FaDownload, FaTimes } from 'react-icons/fa'; // Font Awesome download icon
 import { FaEllipsisV } from 'react-icons/fa'; // Material Design horizontal three dots
-import { FaShare, FaWhatsapp, FaFacebook, FaTwitter, FaCopy, FaTrash, FaEdit, FaQuestion, FaChevronDown, FaChevronUp, FaBible } from 'react-icons/fa'; // Font Awesome share alternative icon
+import { FaShare, FaWhatsapp, FaFacebook, FaTwitter, FaCopy, FaTrash, FaEdit, FaQuestion, FaChevronDown, FaChevronUp, FaBible, FaQuestionCircle } from 'react-icons/fa'; // Font Awesome share alternative icon
 import Spinner from '../../components/spinner/Spinner';
 import LeaderBoard from '../../components/LeaderBoard/LeaderBoard';
 import TriviaGame from '../../components/triviaGame/TriviaGame';
+import { useNavigate } from 'react-router-dom';
+
 
 
 
 const Sermon = () => {
+
+    const navigate = useNavigate();
+
+
+
     const [user, setUser] = useState(null);
     const [isEmailVerified, setIsEmailVerified] = useState(false);
     const [sermons, setSermons] = useState([]);
@@ -187,7 +194,7 @@ const Sermon = () => {
     const updateYearsAndMonths = (sermons) => {
         const uniqueYears = new Set();
         const uniqueMonths = new Set();
- 
+
         sermons.forEach(sermon => {
             const [month, , year] = sermon.dateReleased.split('/');
             uniqueYears.add(year);
@@ -312,10 +319,10 @@ const Sermon = () => {
     };
 
 
-     
+
     useEffect(() => {
         setLeaderBoard(sermonPlaying.leaderBoard)
-                setSermonQuizId(sermonPlaying.id)
+        setSermonQuizId(sermonPlaying.id)
 
     }, [sermonPlaying])
 
@@ -674,13 +681,15 @@ const Sermon = () => {
     // };
 
 
-
+    const handleEditQuiz = (sermonId) => {
+        navigate(`/edit-quiz/${sermonId}`);
+    };
 
 
 
     return (
         <div className='sermon-body'>
-            <h1 className='sermon-hd'>Sermon <FaBible/></h1>
+            <h1 className='sermon-hd'>Sermon <FaBible /></h1>
             {user && isAdmin && (
                 <div className="add-sermon">
                     <FaPlus onClick={handleAddSermonClick} />
@@ -921,8 +930,12 @@ const Sermon = () => {
                                                 <>
                                                     <div onClick={() => handleDeleteSermon(sermon.id)}><FaTrash /> Delete</div>
                                                     <div onClick={() => handleEditClick(sermon)}>
-
                                                         <FaEdit /><span>Edit</span>
+                                                    </div>
+                                                    <div
+                                                        onClick={() => handleEditQuiz(sermon.id)}
+                                                    >
+                                                        <FaQuestionCircle /><span>Edit Quiz</span>
                                                     </div>
                                                 </>
                                             )}
@@ -1080,8 +1093,8 @@ const Sermon = () => {
                                         // setIsQuizOpen={setIsQuizOpen}
                                         // setSermonQuizId = {setSermonQuizId}
                                         sermonPlaying={sermonPlaying}
-                                        collection = 'sermonPage'
-                                        document = 'sermons'
+                                        collection='sermonPage'
+                                        document='sermons'
                                     />
                                 </div>
                                 // <div className="quiz-modal">
@@ -1153,9 +1166,9 @@ const Sermon = () => {
                     )} */}
                 </>
             ) : (
-                
-                    <SignIn />
-                
+
+                <SignIn />
+
 
             )}
             {
