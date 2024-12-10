@@ -68,7 +68,7 @@ function App() {
           <Route path="/prayer-library" element={<PrayerLibrary />} />
           <Route path="/trivia" element={<BibleTrivia />} />
           <Route path="/about-us" element={<AboutUs />} />
-          <Route path="/edit-quiz/:sermonId" element={<EditQuizPage />} />
+          <Route path="/edit-sermon-quiz/:sermonId" element={<EditQuizPage />} />
         </Routes>
       </div>
     </Router>

@@ -682,7 +682,7 @@ const Sermon = () => {
 
 
     const handleEditQuiz = (sermonId) => {
-        navigate(`/edit-quiz/${sermonId}`);
+        navigate(`/edit-sermon-quiz/${sermonId}`);
     };
 
 
