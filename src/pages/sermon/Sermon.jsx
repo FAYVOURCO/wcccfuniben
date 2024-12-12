@@ -935,7 +935,7 @@ const Sermon = () => {
                                                     <div
                                                         onClick={() => handleEditQuiz(sermon.id)}
                                                     >
-                                                        <FaQuestionCircle /><span>Edit Quiz</span>
+                                                        <FaQuestionCircle /><span>Add/Edit Quiz</span>
                                                     </div>
                                                 </>
                                             )}

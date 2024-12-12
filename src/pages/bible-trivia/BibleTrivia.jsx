@@ -8,12 +8,22 @@ import Spinner from '../../components/spinner/Spinner';
 import { FaTimes } from 'react-icons/fa';
 import LeaderBoard from '../../components/LeaderBoard/LeaderBoard';
 import TriviaGame from '../../components/triviaGame/TriviaGame';
-import { FaQuestionCircle} from 'react-icons/fa'; // Font Awesome share alternative icon
+import { FaQuestionCircle } from 'react-icons/fa'; // Font Awesome share alternative icon
+import { FaTrash, FaEllipsisV, FaEdit, FaPlus } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { AiOutlineClose } from 'react-icons/ai';
+
+
+
 
 
 
 
 const BibleTrivia = () => {
+
+    const navigate = useNavigate();
+
+
     const [user, setUser] = useState(null); // To store the current user
     const [isEmailVerified, setIsEmailVerified] = useState(false); // To store email verification status
     const [loading, setLoading] = useState(false); // To control loading state
@@ -24,8 +34,12 @@ const BibleTrivia = () => {
     const [quizQuestions, setQuizQuestions] = useState([])
     const [isQuizOpen, setIsQuizOpen] = useState(false); // State to track if the quiz modal is open
     const [showFinalScore, setShowFinalScore] = useState(false); // State to show the final score
-
-
+    const [isMoreOpen, setIsMoreOpen] = useState(false)
+    const [moreOpenTrivia, setMoreOpenTrivia] = useState('')
+    const [isAdmin, setIsAdmin] = useState(false); // State to track if the user is an admin
+    const [addQuizInfoShowModal, setAddQuizInfoShowModal] = useState(false); // State to show the add quiz info modalcc
+    const [newQuizTitle, setNewQuizTitle] = useState({}); // New sermon data state
+    const [newQuiz, setNewQuiz] = useState({}); // New sermon data state
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -34,6 +48,7 @@ const BibleTrivia = () => {
                     setUser(currentUser);
                     setIsEmailVerified(true);
                     fetchTrivias()
+                    checkIfAdmin(currentUser.uid); // Check if the user is an admin
                     // checkIfAdmin(currentUser.uid); 
                 } else {
                     setIsEmailVerified(false);
@@ -56,7 +71,22 @@ const BibleTrivia = () => {
     //     }
     // };
 
-    
+    const checkIfAdmin = async (userId) => {
+        try {
+            const userDoc = doc(db, 'users', userId); // Get the user document using the auth UID
+            const userSnapshot = await getDoc(userDoc);
+            if (userSnapshot.exists()) {
+                const userData = userSnapshot.data();
+                setIsAdmin(userData.isAdmin || false); // Set admin status based on Firestore data
+            } else {
+                console.log("User not found in Firestore");
+                setIsAdmin(false);
+            }
+        } catch (error) {
+            console.error('Error checking admin status:', error);
+            setIsAdmin(false); // Set to false in case of error
+        }
+    };
 
     const fetchTrivias = async () => {
         try {
@@ -81,7 +111,7 @@ const BibleTrivia = () => {
 
     };
 
-    
+
 
     const handleOpenQuiz = (trivia) => {
         setSlideQuizOut(false)
@@ -91,17 +121,17 @@ const BibleTrivia = () => {
     }
 
 
-    
+
 
 
     const handleCloseQuiz = () => {
         setSlideQuizOut(true)
     }
 
-//   handleQuizClose = () => {
-//         setIsQuizOpen(false); // Close the quiz modal when "Okay" is clicked
-//         setShowFinalScore(false)
-//     };
+    //   handleQuizClose = () => {
+    //         setIsQuizOpen(false); // Close the quiz modal when "Okay" is clicked
+    //         setShowFinalScore(false)
+    //     };
 
     const handleQuizClose = () => {
         setIsQuizOpen(false); // Close the quiz modal when "Okay" is clicked
@@ -111,21 +141,157 @@ const BibleTrivia = () => {
         console.log('wer')
     };
 
+    const handleShowMore = (trivia) => {
+        isMoreOpen == true ? setIsMoreOpen(false) : setIsMoreOpen(true)
+        setMoreOpenTrivia(trivia.id)
+
+    }
+
+    const handleEditQuiz = (QuizId) => {
+        navigate(`/edit-quiz/${QuizId}`);
+    };
 
 
+    const handleAddSermonClick = () => {
+        setAddQuizInfoShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setAddQuizInfoShowModal(false);
+        setNewSermon({}); // Reset the new sermon data
+
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const newQuizId = Date.now().toString(); // Generate a unique ID for the sermon
+
+        
+
+        try {
+            // Get the reference to the existing 'sermons' document
+            const docRef = doc(db, 'bibleTriviaPage', 'trivias');
+
+            // Update the document by adding the new sermon map
+            await setDoc(docRef, {
+                [newQuizId]: newQuizId, // Add new sermon with dynamic ID
+            }, { merge: true }); // Use merge to avoid overwriting the existing data
+
+            fetchTrivias(); // Re-fetch the sermons after adding
+            handleCloseModal(); // Close the modal after submitting
+        } catch (error) {
+            console.error("Error adding sermon:", error);
+        }
+    };
+
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setNewQuizTitle({ ...newQuiz, [name]: value });
+    };
+
+
+    const handleDeleteQuiz = async (trivaId) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this sermon?");
+        if (confirmDelete) {
+            try {
+                const docRef = doc(db, 'bibleTriviaPage', 'trivias');
+                const sermonDoc = await getDoc(docRef);
+
+                if (sermonDoc.exists()) {
+                    const sermonData = sermonDoc.data();
+                    delete sermonData[trivaId]; // Remove the sermon from the data object
+
+                    await setDoc(docRef, sermonData); // Update Firestore with the new data
+                    fetchTrivias(); // Re-fetch the sermons after deleting
+                } else {
+                    console.log("No sermons found!");
+                }
+            } catch (error) {
+                console.error("Error deleting sermon:", error);
+            }
+        }
+    };
 
     return (
         <div className='trivia-body'>
-            <h1 className='trivia-hd'>Trivia <FaQuestionCircle/> </h1>
+
+
+            {user && isAdmin && (
+                <div className="add-quiz-btn">
+                    <FaPlus onClick={handleAddSermonClick} />
+                </div>
+            )}
+
+            {addQuizInfoShowModal && (
+                <div className="add-sermon-modal">
+                    <div className="add-sermon-modal-content">
+                        <div className='frm-hd'>
+
+                            <h3>Add New Sermon</h3>
+                            <button className="close" onClick={handleCloseModal}>
+                                <AiOutlineClose />
+                            </button>
+
+                        </div>
+                        <form onSubmit={handleSubmit}>
+                            {/* <div className="form-group">
+                                <label>Map Name (ID):</label>
+                                <input
+                                    type="text"
+                                    name="mapName"
+                                    value={newSermon.mapName || ""}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div> */}
+                            <div className="form-group">
+                                <label>Topic:</label>
+                                <input
+                                    type="text"
+                                    name="topic"
+                                    // value={newQuizTitle.Title || ""}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                            
+                            <button type="submit">Add Sermon</button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            <h1 className='trivia-hd'>Trivia <FaQuestionCircle /> </h1>
 
             <div className='trivia-cards' >
                 {trivias.map((trivia, index) => (
-                    <div key={index} className='trivia-card' 
-                    onClick={() =>
-                     handleOpenQuiz(trivia)
-                     
-                     }>
-                        <h3>{trivia.Title}</h3>
+                    <div key={index} className='trivia-card'
+                    >
+                        <div onClick={() =>
+                            handleOpenQuiz(trivia)
+                        }
+                            className='trivia-card-title'
+                        >
+                            <h3>{trivia.Title}</h3>
+                        </div>
+
+                        <div className='more-options-trivia'
+                        >
+                            <FaEllipsisV onClick={() => handleShowMore(trivia)} />
+
+                            {
+                                isMoreOpen && trivia.id == moreOpenTrivia && (
+                                    <div className='more-options-t'>
+                                        <div className='more-option-t' onClick={() => handleShowMore(trivia)}><FaTimes />Close</div>
+                                        <div className='more-option-t' onClick={()=>handleDeleteQuiz(trivia.id)}  ><FaTrash />Delete</div>
+                                        <div className='more-option-t'><FaEdit />Edit Title</div>
+                                        <div className='more-option-t' onClick={() => handleEditQuiz(trivia.id)}><FaEdit />Add/Edit Quiz</div>
+
+                                    </div>
+                                )
+                            }
+                        </div>
                     </div>
                 ))}
             </div>

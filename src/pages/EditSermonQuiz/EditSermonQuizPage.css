@@ -1,0 +1,86 @@
+ 
+ .edit-quiz-page-bd{
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    margin-top: 5rem;
+  }
+  
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+  
+  .question-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .question-card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .question-card h3 {
+    font-size: 18px;
+    color: #333;
+  }
+  
+  textarea,
+  input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  textarea {
+    height: 100px;
+    resize: vertical;
+  }
+  
+  .add-button,
+  .save-button,
+  .delete-button{
+        padding: 10px 20px;
+     
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  
+  .delete-button {
+    background-color: #ff4d4d;
+  }
+  
+  .delete-button:hover {
+    background-color: #ff1a1a;
+  }
+  
+  .add-button,
+  .save-button {
+    margin-top: 20px;
+    width: 100%;
+  }
+  
+  .add-button {
+    background-color:  #74A4CB;
+  }
+  
+  .add-button:hover {
+    background-color:  #5b83a3;
+  }
+  
+  .save-button {
+    color: black;
+  }
+  
+  /* .save-button:hover {
+    background-color:  ;
+  }
+   */

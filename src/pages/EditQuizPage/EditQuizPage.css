@@ -69,18 +69,18 @@
   }
   
   .add-button {
-    background-color: #28a745;
+    background-color:  #74A4CB;
   }
   
   .add-button:hover {
-    background-color: #218838;
+    background-color:  #5b83a3;
   }
   
   .save-button {
-    background-color: #007bff;
+    color: black;
   }
   
-  .save-button:hover {
-    background-color: #0056b3;
+  /* .save-button:hover {
+    background-color:  ;
   }
-  
+   */

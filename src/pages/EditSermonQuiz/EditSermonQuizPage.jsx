@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase'; // Update with your Firebase configuration
-import './EditQuizPage.css';
+import './EditSermonQuizPage.css';
+import { FaTrash, FaEllipsisV } from 'react-icons/fa';
+import Spinner from '../../components/spinner/Spinner';
 
-const EditQuizPage = () => {
+const EditSermonQuizPage = () => {
     const { sermonId } = useParams(); // Get the sermonId from the route
     const [quiz, setQuiz] = useState({});
     const [loading, setLoading] = useState(true);
@@ -12,6 +14,7 @@ const EditQuizPage = () => {
 
     // Fetch the quiz data
     useEffect(() => {
+        // setLoading(true)
         const fetchQuiz = async () => {
             try {
                 const docRef = doc(db, 'sermonPage', 'sermons');
@@ -129,7 +132,7 @@ const EditQuizPage = () => {
     };
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <Spinner/>;
     }
 
     // Sort quiz questions by questionId to display them in order
@@ -198,7 +201,7 @@ const EditQuizPage = () => {
                         />
                         {/* Show delete button only for the last question */}
                         {index === array.length - 1 && (
-                            <button onClick={() => deleteQuestion(questionId)} className='delete-button'>Delete Question</button>
+                            <button onClick={() => deleteQuestion(questionId)} className='delete-button'><FaTrash/></button>
                         )}
                         
                     </div>
@@ -210,8 +213,10 @@ const EditQuizPage = () => {
             </div>
             <button onClick={addNewQuestion} className='add-button'>Add New Question</button>
             <button onClick={saveChanges} className='save-button'>Save Changes</button>
+
+            
         </div>
     );
 };
 
-export default EditQuizPage;
+export default EditSermonQuizPage;
