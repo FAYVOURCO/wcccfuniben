@@ -8,6 +8,9 @@
     cursor: pointer;
 }
 
+select{
+    border: none;
+}
 .sermon-hd{
     display: flex;
     justify-content: left;

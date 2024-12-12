@@ -691,8 +691,8 @@ const Sermon = () => {
         <div className='sermon-body'>
             <h1 className='sermon-hd'>Sermon <FaBible /></h1>
             {user && isAdmin && (
-                <div className="add-sermon">
-                    <FaPlus onClick={handleAddSermonClick} />
+                <div className="add-sermon" onClick={handleAddSermonClick}>
+                    <FaPlus  />
                 </div>
             )}
 

@@ -38,8 +38,10 @@ const BibleTrivia = () => {
     const [moreOpenTrivia, setMoreOpenTrivia] = useState('')
     const [isAdmin, setIsAdmin] = useState(false); // State to track if the user is an admin
     const [addQuizInfoShowModal, setAddQuizInfoShowModal] = useState(false); // State to show the add quiz info modalcc
-    const [newQuizTitle, setNewQuizTitle] = useState({}); // New sermon data state
     const [newQuiz, setNewQuiz] = useState({}); // New sermon data state
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedQuiz, setEditedQuiz] = useState({});
+
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -152,21 +154,36 @@ const BibleTrivia = () => {
     };
 
 
-    const handleAddSermonClick = () => {
+    const handleAddQuizClick = () => {
         setAddQuizInfoShowModal(true);
     };
 
     const handleCloseModal = () => {
         setAddQuizInfoShowModal(false);
-        setNewSermon({}); // Reset the new sermon data
+        setNewQuiz({}); // Reset the new sermon data
 
     };
+
+        // Helper function to format the date
+        const formatDate2 = () => {
+            const d = new Date();
+            const month = d.getMonth() + 1; // Months are 0-indexed, so we add 1
+            const day = d.getDate();
+            const year = d.getFullYear();
+            return `${month}/${day}/${year}`; // Return in MM/DD/YYYY format
+        };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const newQuizId = Date.now().toString(); // Generate a unique ID for the sermon
+        // Format the date as MM/DD/YYYY
+        const formattedDate = formatDate2(newQuiz.dateReleased);
 
-        
+        const newSermonWithFormattedDate = {
+            ...newQuiz,
+            dateReleased: formattedDate, // Update the sermon with the formatted date
+        };
+
 
         try {
             // Get the reference to the existing 'sermons' document
@@ -174,7 +191,7 @@ const BibleTrivia = () => {
 
             // Update the document by adding the new sermon map
             await setDoc(docRef, {
-                [newQuizId]: newQuizId, // Add new sermon with dynamic ID
+                [newQuizId]: newSermonWithFormattedDate, // Add new sermon with dynamic ID
             }, { merge: true }); // Use merge to avoid overwriting the existing data
 
             fetchTrivias(); // Re-fetch the sermons after adding
@@ -187,7 +204,7 @@ const BibleTrivia = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setNewQuizTitle({ ...newQuiz, [name]: value });
+        setNewQuiz({ ...newQuiz, [name]: value });
     };
 
 
@@ -213,13 +230,51 @@ const BibleTrivia = () => {
         }
     };
 
+    const handleEditClick = (trivia) => {
+        setMoreOpenTrivia(false)
+        setIsEditing(true);
+        setEditedQuiz(trivia); // Prepopulate the form with the selected sermon details
+        // setActiveSermonId(trivia.id)
+        console.log(editedQuiz)
+    };
+
+    const handleUpdateQuiz = async () => {
+        const updateSermon = window.confirm("Are you sure you want to make these changes?");
+
+        setLoading(true)
+        try {
+            const docRef = doc(db, 'bibleTriviaPage', 'trivias');
+            const docSnap = await getDoc(docRef);
+
+            if (updateSermon && docSnap.exists()) {
+                const sermonsData = docSnap.data();
+                sermonsData[editedQuiz.id] = { ...editedQuiz }; // Update sermon details
+
+                await setDoc(docRef, sermonsData); // Save updates to Firestore
+                setTrivias((prevTrivias) =>
+                    prevTrivias.map((quiz) => quiz.id === editedQuiz.id ? editedQuiz : quiz)
+                );
+                // setFilteredSermons((prevFilteredSermons) =>
+                //     prevFilteredSermons.map((sermon) => sermon.id === editedSermon.id ? editedSermon : sermon)
+                // );
+            setLoading(false)
+            } else {
+                console.log("No sermons found!");
+            }
+
+            setIsEditing(false); // Close edit mode
+        } catch (error) {
+            console.error("Error updating sermon:", error);
+        }
+    };
+
     return (
         <div className='trivia-body'>
 
 
             {user && isAdmin && (
-                <div className="add-quiz-btn">
-                    <FaPlus onClick={handleAddSermonClick} />
+                <div className="add-quiz-btn" onClick={handleAddQuizClick}>
+                    <FaPlus />
                 </div>
             )}
 
@@ -247,15 +302,16 @@ const BibleTrivia = () => {
                             </div> */}
                             <div className="form-group">
                                 <label>Topic:</label>
+                                
                                 <input
                                     type="text"
-                                    name="topic"
-                                    // value={newQuizTitle.Title || ""}
+                                    name="Title"
+                                    value={newQuiz.Title || ""}
                                     onChange={handleChange}
                                     required
                                 />
                             </div>
-                            
+
                             <button type="submit">Add Sermon</button>
                         </form>
                     </div>
@@ -268,13 +324,28 @@ const BibleTrivia = () => {
                 {trivias.map((trivia, index) => (
                     <div key={index} className='trivia-card'
                     >
-                        <div onClick={() =>
-                            handleOpenQuiz(trivia)
-                        }
-                            className='trivia-card-title'
-                        >
-                            <h3>{trivia.Title}</h3>
-                        </div>
+                         {isEditing && editedQuiz.id === trivia.id ? (
+                                            <div className='edit-form'>
+                                                <input
+                                                    type="text"
+                                                    value={editedQuiz.Title}
+                                                    onChange={(e) => setEditedQuiz({ ...editedQuiz, Title: e.target.value })}
+                                                    placeholder="Quiz Title"
+                                                />
+                                               
+                                                <button onClick={handleUpdateQuiz}>Save</button>
+                                                <button onClick={() => setIsEditing(false)}>Cancel</button>
+                                            </div>
+                                        ) : (
+                                            <div onClick={() =>
+                                                handleOpenQuiz(trivia)
+                                            }
+                                                className='trivia-card-title'
+                                            >
+                                                <h3>{trivia.Title}</h3>
+                                            </div>
+                                        )}
+                       
 
                         <div className='more-options-trivia'
                         >
@@ -284,8 +355,8 @@ const BibleTrivia = () => {
                                 isMoreOpen && trivia.id == moreOpenTrivia && (
                                     <div className='more-options-t'>
                                         <div className='more-option-t' onClick={() => handleShowMore(trivia)}><FaTimes />Close</div>
-                                        <div className='more-option-t' onClick={()=>handleDeleteQuiz(trivia.id)}  ><FaTrash />Delete</div>
-                                        <div className='more-option-t'><FaEdit />Edit Title</div>
+                                        <div className='more-option-t' onClick={() => handleDeleteQuiz(trivia.id)}  ><FaTrash />Delete</div>
+                                        <div className='more-option-t'onClick={()=>handleEditClick(trivia)}><FaEdit />Edit Title</div>
                                         <div className='more-option-t' onClick={() => handleEditQuiz(trivia.id)}><FaEdit />Add/Edit Quiz</div>
 
                                     </div>
