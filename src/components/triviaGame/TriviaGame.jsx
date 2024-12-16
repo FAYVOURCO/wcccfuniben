@@ -19,6 +19,7 @@ const TriviaGame = ({
   // FeedbackColor,
   // setIsQuizOpen
   user,
+  user2,
   sermonPlaying,
   collection,
   document
@@ -118,7 +119,7 @@ const TriviaGame = ({
       await updateDoc(sermonRef, {
         [`${sermonId}.leaderBoard.${mapId}`]: {
           date,
-          email: user.email,
+          username: user2.username,
           percentageScore,
           time,
           userId: user.uid

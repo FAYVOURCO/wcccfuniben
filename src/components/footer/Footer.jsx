@@ -38,7 +38,8 @@ const Footer = () => {
           </div> */}
         </div>
 
-        <small className='copyright'>© Copyright Watchman Catholic Charismatic Campus UNIBEN 2024. All Right Reserved. Developed by <a className='fay' href='https://www.linkedin.com/company/fayvourco-networks' target='_blank'>FayvourCo. Networks</a></small>
+        <small className='copyright'>© Copyright Watchman Catholic Charismatic Campus UNIBEN 2024. All Right Reserved. <br/> <br/>Developed by WCCCF Media Team in partnership with <a className='fay' href='https://www.linkedin.com/company/fayvourco-networks' target='_blank'>FayvourCo. Networks</a>
+        .</small>
 
       </div>
 

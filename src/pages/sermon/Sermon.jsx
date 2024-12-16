@@ -15,7 +15,7 @@ import Spinner from '../../components/spinner/Spinner';
 import LeaderBoard from '../../components/LeaderBoard/LeaderBoard';
 import TriviaGame from '../../components/triviaGame/TriviaGame';
 import { useNavigate } from 'react-router-dom';
-
+import EnterUsernameModal from '../../components/EnterUsernameModal/EnterUsernameModal';
 
 
 
@@ -60,19 +60,35 @@ const Sermon = () => {
     const [FeedbackColor, setFeedbackColor] = useState("")
     const [minimiseCurrentAudio, setminimiseCurrentAudio] = useState(false)
     // const [userScore, setUserSCore] = useState('')
+    const [showUserNameModal, setShowUserNameModal] = useState(false)
+    const [user2, setUser2] = useState(null)
 
 
 
 
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (currentUser) {
                 if (currentUser.emailVerified) {
                     setUser(currentUser);
                     setIsEmailVerified(true);
                     fetchSermons();
                     checkIfAdmin(currentUser.uid); // Check if the user is an admin
+
+                    const userDoc = doc(db, 'users', currentUser.uid);
+                    const userSnapshot = await getDoc(userDoc);
+                    setUser2(userSnapshot.data())
+
+                    if (userSnapshot.exists()) {
+                        const userData = userSnapshot.data();
+                        if (!userData.username) {
+                            setShowUserNameModal(true); // Show modal if username is missing
+                            // console.log('hi')
+                        }
+                    } else {
+                        console.log('User not found in Firestore');
+                    }
                 } else {
                     setIsEmailVerified(false);
                     setLoading(false)
@@ -291,32 +307,50 @@ const Sermon = () => {
 
     const handlePlaySermon = (sermonUrl, sermon) => {
         if (currentAudio !== sermonUrl) {
-            setLoading(true); // Start loading when a new sermon is selected
+            setLoading(true);
             audioPlayer.src = sermonUrl;
 
-            audioPlayer.oncanplay = () => {
-                setLoading(false); // Stop loading when audio is ready to play
-                audioPlayer.play();
-                setIsPlaying(true);
-                setCurrentAudio(sermonUrl);
-                setSermonPlaying(sermon);
-                console.log(sermon)
+            const onLoadedMetadata = () => {
+                setLoading(false);
+                audioPlayer.play()
+                    .then(() => {
+                        setIsPlaying(true);
+                        setCurrentAudio(sermonUrl);
+                        setSermonPlaying(sermon);
+                    })
+                    .catch((error) => {
+                        alert("Error: Unable to play the audio. Please check your connection.");
+                        console.error("Audio play error:", error);
+                    });
             };
 
-            audioPlayer.currentTime = 0;
+            const onError = () => {
+                setLoading(false);
+                // alert("Error: Unable to load the audio. Please check the file or network connection.");
+            };
+
+            // Attach inline event handlers
+            audioPlayer.onloadedmetadata = onLoadedMetadata;
+            audioPlayer.onerror = onError;
         } else {
             if (isPlaying) {
                 audioPlayer.pause();
             } else {
-                audioPlayer.play();
+                audioPlayer.play()
+                    .then(() => {
+                        setIsPlaying(true);
+                    })
+                    .catch((error) => {
+                        alert("Error: Unable to play the audio.");
+                        console.error("Audio play error:", error);
+                    });
             }
             setIsPlaying(!isPlaying);
         }
-
-        // handleGetLeaders(sermonPlaying.LeaderBoard)
-        // setSermonQuizId(sermonPlaying.id)
-        // setLeaderBoard(sermonPlaying.leaderBoard)
     };
+
+
+
 
 
 
@@ -327,7 +361,34 @@ const Sermon = () => {
     }, [sermonPlaying])
 
 
+    const fetchSermonById = async (sermonId) => {
+        if (!sermonId) return;
+        try {
+            setLoading(true);
+            const docRef = doc(db, 'sermonPage', 'sermons');
+            const docSnap = await getDoc(docRef);
 
+            if (docSnap.exists()) {
+                const sermonsData = docSnap.data();
+                if (sermonsData[sermonId]) {
+                    setSermonPlaying({ id: sermonId, ...sermonsData[sermonId] });
+                } else {
+                    console.log(`Sermon with ID ${sermonId} not found!`);
+                }
+            } else {
+                console.log("No sermons found!");
+            }
+        } catch (error) {
+            console.error("Error fetching sermon by ID:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchSermonById(sermonPlaying?.id);
+        console.log(sermonPlaying.leaderBoard)
+    }, [sermonPlaying?.id, isQuizComplete, isQuizOpen]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -689,11 +750,19 @@ const Sermon = () => {
 
     return (
         <div className='sermon-body'>
+
             <h1 className='sermon-hd'>Sermon <FaBible /></h1>
             {user && isAdmin && (
                 <div className="add-sermon" onClick={handleAddSermonClick}>
-                    <FaPlus  />
+                    <FaPlus />
                 </div>
+            )}
+
+            {showUserNameModal && (
+                <EnterUsernameModal
+                    userId={user?.uid}
+                    onClose={() => setShowUserNameModal(false)}
+                />
             )}
 
             {/* Modal for adding sermon */}
@@ -917,11 +986,19 @@ const Sermon = () => {
                                             <div
                                                 onClick={() => setActiveSermonId(null)}
                                             ><FaTimes /> <small>Close</small></div>
-                                            <div><a
+                                            {/* <div><a
                                                 href={sermon.sermonUrl}
                                                 download
                                                 onClick={() => setActiveSermonId(null)} // Close options on click
-                                            ><FaDownload /><span>Download</span></a></div>
+                                            ><FaDownload /><span>Download</span></a></div> */}
+
+                                            <div>
+                                                <a href={sermon.sermonUrl} target="_blank" rel="noopener noreferrer">
+                                                    <FaDownload />
+                                                    <span>Download</span>
+                                                </a>
+                                            </div>
+
                                             {/* <div
                                                 onClick={() => handleOpenQuiz(sermon.id)}
                                             ><FaQuestion /><span>Quiz</span></div> */}
@@ -1081,6 +1158,7 @@ const Sermon = () => {
                                 <div>
                                     <TriviaGame
                                         user={user}
+                                        user2={user2}
                                         quizQuestions={quizQuestions}
                                         // currentQuestionIndex={currentQuestionIndex}
                                         // showFinalScore={showFinalScore}

@@ -183,7 +183,6 @@ select{
 
 .sermon-item .more-options {
     background-color: white;
-    width: 12rem;
     padding: 1rem;
     border-radius: 0.5rem;
     background-color: #ffffff;
@@ -196,6 +195,10 @@ select{
     right: 1rem;
     cursor: pointer;
     color: black;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
 
 }
 
@@ -209,7 +212,8 @@ select{
 .sermon-item .more-options div {
     display: flex;
     align-items: center;
-
+    padding: 0.5rem 1rem;
+ 
 }
 
 .sermon-item .more-options div a {
@@ -235,6 +239,8 @@ select{
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     /* Smooth hover effect */
     cursor: pointer;
+    height: 100%;
+
 }
 
 .sermon-info:hover {
@@ -417,7 +423,7 @@ transform: translateY(80dvh);
 
 
 .take-quiz-btn {
-    color: black;
+    color: white;
     font-weight: bold;
     background-color: #74A4CB;
     padding: 0.2rem 0.5rem;

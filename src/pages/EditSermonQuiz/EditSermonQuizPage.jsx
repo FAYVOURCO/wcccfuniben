@@ -1,19 +1,89 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../../firebase'; // Update with your Firebase configuration
 import './EditSermonQuizPage.css';
 import { FaTrash, FaEllipsisV } from 'react-icons/fa';
 import Spinner from '../../components/spinner/Spinner';
+import { auth, db } from '../../firebase'; // Update with your Firebase configuration
+import { onAuthStateChanged } from 'firebase/auth';
+
 
 const EditSermonQuizPage = () => {
     const { sermonId } = useParams(); // Get the sermonId from the route
     const [quiz, setQuiz] = useState({});
     const [loading, setLoading] = useState(true);
     const [sermonData, setSermonData] = useState({});
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isEmailVerified, setIsEmailVerified] = useState(false);
+    const [user2, setUser2] = useState(null);
 
+
+    const navigate = useNavigate();
+    
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+            if (currentUser) {
+                if (currentUser.emailVerified) {
+                    // setUser(currentUser);
+                    setIsEmailVerified(true);
+                     checkIfAdmin(currentUser.uid); 
+                     // Check if the user is an admin
+                    
+                    // checkIfAdmin(currentUser.uid); 
+                    const userDoc = doc(db, 'users', currentUser.uid);
+                    const userSnapshot = await getDoc(userDoc);
+                    setUser2(userSnapshot.data())
+
+                    if (userSnapshot.exists()) {
+                        const userData = userSnapshot.data();
+                        if (!userData.username) {
+                            setShowUserNameModal(true); // Show modal if username is missing
+                            // console.log('hi')
+                        }
+                    } else {
+                        console.log('User not found in Firestore');
+                    }
+                } else {
+                    setIsEmailVerified(false);
+                }
+            } else {
+                setUser(null);
+                setIsEmailVerified(false);
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    const checkIfAdmin = async (userId) => {
+        try {
+            const userDoc = doc(db, 'users', userId); // Get the user document using the auth UID
+            const userSnapshot = await getDoc(userDoc);
+            if (userSnapshot.exists()) {
+                const userData = userSnapshot.data();
+                const isAdminUser = userData.isAdmin || false;
+                setIsAdmin(isAdminUser);
+
+                if (!isAdminUser) {
+                    navigate('/'); // Redirect non-admins to the homepage
+                }
+            } else {
+                console.log('User not found in Firestore');
+                setIsAdmin(false);
+                navigate('/'); // Redirect non-admins to the homepage
+            }
+        } catch (error) {
+            console.error('Error checking admin status:', error);
+            setIsAdmin(false);
+            navigate('/'); // Redirect non-admins to the homepage
+        }
+    };
+
+
+       
     // Fetch the quiz data
     useEffect(() => {
+        
         // setLoading(true)
         const fetchQuiz = async () => {
             try {

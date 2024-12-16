@@ -103,9 +103,9 @@ justify-content: center;
     display: flex;
     align-items: center;
     justify-content: left;
-    gap: 0.5em;
+    gap: 0.5rem;
     padding:0.5rem 1rem;
-
+ 
  }
 
 .trivia-card:hover {
@@ -115,7 +115,7 @@ justify-content: center;
 
 .start-quiz-btn {
     background:    #74A4CB;
-    color: black;
+    color: white;
     padding: 10px 20px;
     border: none;
     border-radius: 5px;

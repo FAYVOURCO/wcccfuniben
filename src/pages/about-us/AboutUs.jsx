@@ -61,7 +61,7 @@ const AboutUs = () => {
                                 <p key={sentenceIndex} className='sentence'>{sentence}</p>
                             ))}
 
-                            {card.picture !== "" && <img src={card.picture} alt={card.title} className="card-image" />}
+                            {/* {card.picture !== "" && <img src={card.picture} alt={card.title} className="card-image" />} */}
 
  
                         </div>

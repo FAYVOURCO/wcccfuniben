@@ -12,6 +12,8 @@ import { FaQuestionCircle } from 'react-icons/fa'; // Font Awesome share alterna
 import { FaTrash, FaEllipsisV, FaEdit, FaPlus } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { AiOutlineClose } from 'react-icons/ai';
+import EnterUsernameModal from '../../components/EnterUsernameModal/EnterUsernameModal';
+
 
 
 
@@ -41,10 +43,12 @@ const BibleTrivia = () => {
     const [newQuiz, setNewQuiz] = useState({}); // New sermon data state
     const [isEditing, setIsEditing] = useState(false);
     const [editedQuiz, setEditedQuiz] = useState({});
+    const [showUserNameModal, setShowUserNameModal] = useState(false)
+    const [user2, setUser2] = useState(null)
 
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (currentUser) {
                 if (currentUser.emailVerified) {
                     setUser(currentUser);
@@ -52,6 +56,19 @@ const BibleTrivia = () => {
                     fetchTrivias()
                     checkIfAdmin(currentUser.uid); // Check if the user is an admin
                     // checkIfAdmin(currentUser.uid); 
+                    const userDoc = doc(db, 'users', currentUser.uid);
+                    const userSnapshot = await getDoc(userDoc);
+                    setUser2(userSnapshot.data())
+
+                    if (userSnapshot.exists()) {
+                        const userData = userSnapshot.data();
+                        if (!userData.username) {
+                            setShowUserNameModal(true); // Show modal if username is missing
+                            // console.log('hi')
+                        }
+                    } else {
+                        console.log('User not found in Firestore');
+                    }
                 } else {
                     setIsEmailVerified(false);
                 }
@@ -115,6 +132,8 @@ const BibleTrivia = () => {
 
 
 
+
+
     const handleOpenQuiz = (trivia) => {
         setSlideQuizOut(false)
         setOpenQuiz(true)
@@ -135,12 +154,35 @@ const BibleTrivia = () => {
     //         setShowFinalScore(false)
     //     };
 
-    const handleQuizClose = () => {
+    const handleQuizClose = async () => {
         setIsQuizOpen(false); // Close the quiz modal when "Okay" is clicked
         setShowFinalScore(false)
-        fetchTrivias()
-        setCurrentTrivia(currentTrivia)
-        console.log('wer')
+        // fetchTrivias()
+        // setCurrentTrivia(currentTrivia)
+        // console.log('wer')
+        try {
+            // Fetch the latest trivia data from Firestore
+            const docRef = doc(db, 'bibleTriviaPage', 'trivias');
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                // console.log(currentTrivia.id)
+                const triviaData = docSnap.data();
+                const updatedTrivia = triviaData[currentTrivia.id];
+                console.log(updatedTrivia)
+                // Update the currentTrivia state with the latest leaderboard data
+                setCurrentTrivia({
+                    ...currentTrivia,
+                    leaderBoard: updatedTrivia.leaderBoard || [],
+                });
+
+                console.log('Leaderboard updated successfully:', updatedTrivia.leaderBoard);
+            } else {
+                console.error("Trivia document not found!");
+            }
+        } catch (error) {
+            console.error("Error fetching updated trivia data:", error);
+        }
     };
 
     const handleShowMore = (trivia) => {
@@ -164,14 +206,14 @@ const BibleTrivia = () => {
 
     };
 
-        // Helper function to format the date
-        const formatDate2 = () => {
-            const d = new Date();
-            const month = d.getMonth() + 1; // Months are 0-indexed, so we add 1
-            const day = d.getDate();
-            const year = d.getFullYear();
-            return `${month}/${day}/${year}`; // Return in MM/DD/YYYY format
-        };
+    // Helper function to format the date
+    const formatDate2 = () => {
+        const d = new Date();
+        const month = d.getMonth() + 1; // Months are 0-indexed, so we add 1
+        const day = d.getDate();
+        const year = d.getFullYear();
+        return `${month}/${day}/${year}`; // Return in MM/DD/YYYY format
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -257,7 +299,7 @@ const BibleTrivia = () => {
                 // setFilteredSermons((prevFilteredSermons) =>
                 //     prevFilteredSermons.map((sermon) => sermon.id === editedSermon.id ? editedSermon : sermon)
                 // );
-            setLoading(false)
+                setLoading(false)
             } else {
                 console.log("No sermons found!");
             }
@@ -271,6 +313,12 @@ const BibleTrivia = () => {
     return (
         <div className='trivia-body'>
 
+            {showUserNameModal && (
+                <EnterUsernameModal
+                    userId={user?.uid}
+                    onClose={() => setShowUserNameModal(false)}
+                />
+            )}
 
             {user && isAdmin && (
                 <div className="add-quiz-btn" onClick={handleAddQuizClick}>
@@ -283,7 +331,7 @@ const BibleTrivia = () => {
                     <div className="add-sermon-modal-content">
                         <div className='frm-hd'>
 
-                            <h3>Add New Sermon</h3>
+                            <h3>Add New Trivia</h3>
                             <button className="close" onClick={handleCloseModal}>
                                 <AiOutlineClose />
                             </button>
@@ -302,7 +350,7 @@ const BibleTrivia = () => {
                             </div> */}
                             <div className="form-group">
                                 <label>Topic:</label>
-                                
+
                                 <input
                                     type="text"
                                     name="Title"
@@ -324,28 +372,28 @@ const BibleTrivia = () => {
                 {trivias.map((trivia, index) => (
                     <div key={index} className='trivia-card'
                     >
-                         {isEditing && editedQuiz.id === trivia.id ? (
-                                            <div className='edit-form'>
-                                                <input
-                                                    type="text"
-                                                    value={editedQuiz.Title}
-                                                    onChange={(e) => setEditedQuiz({ ...editedQuiz, Title: e.target.value })}
-                                                    placeholder="Quiz Title"
-                                                />
-                                               
-                                                <button onClick={handleUpdateQuiz}>Save</button>
-                                                <button onClick={() => setIsEditing(false)}>Cancel</button>
-                                            </div>
-                                        ) : (
-                                            <div onClick={() =>
-                                                handleOpenQuiz(trivia)
-                                            }
-                                                className='trivia-card-title'
-                                            >
-                                                <h3>{trivia.Title}</h3>
-                                            </div>
-                                        )}
-                       
+                        {isEditing && editedQuiz.id === trivia.id ? (
+                            <div className='edit-form'>
+                                <input
+                                    type="text"
+                                    value={editedQuiz.Title}
+                                    onChange={(e) => setEditedQuiz({ ...editedQuiz, Title: e.target.value })}
+                                    placeholder="Quiz Title"
+                                />
+
+                                <button onClick={handleUpdateQuiz}>Save</button>
+                                <button onClick={() => setIsEditing(false)}>Cancel</button>
+                            </div>
+                        ) : (
+                            <div onClick={() =>
+                                handleOpenQuiz(trivia)
+                            }
+                                className='trivia-card-title'
+                            >
+                                <h3>{trivia.Title}</h3>
+                            </div>
+                        )}
+
 
                         <div className='more-options-trivia'
                         >
@@ -356,8 +404,15 @@ const BibleTrivia = () => {
                                     <div className='more-options-t'>
                                         <div className='more-option-t' onClick={() => handleShowMore(trivia)}><FaTimes />Close</div>
                                         <div className='more-option-t' onClick={() => handleDeleteQuiz(trivia.id)}  ><FaTrash />Delete</div>
-                                        <div className='more-option-t'onClick={()=>handleEditClick(trivia)}><FaEdit />Edit Title</div>
-                                        <div className='more-option-t' onClick={() => handleEditQuiz(trivia.id)}><FaEdit />Add/Edit Quiz</div>
+                                        {
+                                            isAdmin && (
+                                                <>
+                                                    <div className='more-option-t' onClick={() => handleEditClick(trivia)}><FaEdit />Edit Title</div>
+                                                    <div className='more-option-t' onClick={() => handleEditQuiz(trivia.id)}><FaEdit />Add/Edit Quiz</div>
+                                                </>
+                                            )
+                                        }
+
 
                                     </div>
                                 )
@@ -389,6 +444,7 @@ const BibleTrivia = () => {
                             isQuizOpen && (
                                 <TriviaGame
                                     user={user}
+                                    user2={user2}
                                     quizQuestions={
                                         quizQuestions
                                     }
