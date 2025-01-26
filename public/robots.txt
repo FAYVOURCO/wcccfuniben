@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://trydreamlab-spur.web.app/sitemap.txt

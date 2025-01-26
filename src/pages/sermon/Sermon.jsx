@@ -14,14 +14,16 @@ import { FaShare, FaWhatsapp, FaFacebook, FaTwitter, FaCopy, FaTrash, FaEdit, Fa
 import Spinner from '../../components/spinner/Spinner';
 import LeaderBoard from '../../components/LeaderBoard/LeaderBoard';
 import TriviaGame from '../../components/triviaGame/TriviaGame';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import EnterUsernameModal from '../../components/EnterUsernameModal/EnterUsernameModal';
 
 
 
 const Sermon = () => {
 
+ 
     const navigate = useNavigate();
+    const { sermonId } = useParams(); // Get the sermonId from the URL
 
 
 
@@ -62,6 +64,7 @@ const Sermon = () => {
     // const [userScore, setUserSCore] = useState('')
     const [showUserNameModal, setShowUserNameModal] = useState(false)
     const [user2, setUser2] = useState(null)
+    const [sermonIdPlaying, setSermonIdPlaying] = useState(null)
 
 
 
@@ -305,18 +308,64 @@ const Sermon = () => {
         }
     };
 
+    useEffect(() => {
+        console.log(sermonId)
+        if (sermonId) {
+            // Fetch the sermon details based on the sermonId
+            const fetchSermonById = async () => {
+                try {
+                    setLoading(true);
+                    const docRef = doc(db, 'sermonPage', 'sermons');
+                    const docSnap = await getDoc(docRef);
+    
+                    if (docSnap.exists()) {
+                        const sermonsData = docSnap.data();
+                        if (sermonsData[sermonId]) {
+                            const sermon = { id: sermonId, ...sermonsData[sermonId] };
+                            setSermonPlaying(sermon); // Set the currently playing sermon
+                            setCurrentAudio(sermon.sermonUrl); // Set the audio URL
+                            audioPlayer.src = sermon.sermonUrl; // Load the audio
+                            console.log(currentAudio)
+                        } else {
+                            console.log(`Sermon with ID ${sermonId} not found!`);
+                        }
+                    } else {
+                        console.log("No sermons found!");
+                    }
+                } catch (error) {
+                    console.error("Error fetching sermon by ID:", error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+    
+            fetchSermonById();
+            
+                // handlePlaySermon(sermonPlaying.sermonUrl, sermonPlaying)
+            
+        }
+    }, [sermonId]); // Run this effect whenever sermonId changes
+    
+
     const handlePlaySermon = (sermonUrl, sermon) => {
+        navigate(`/sermon/${sermon.id}`);
+        // setSermonIdPlaying(sermon.id)
+
+
         if (currentAudio !== sermonUrl) {
             setLoading(true);
-            audioPlayer.src = sermonUrl;
+            setProgress(0);
+            // audioPlayer.src = currentAudio;
 
             const onLoadedMetadata = () => {
-                setLoading(false);
                 audioPlayer.play()
+
                     .then(() => {
                         setIsPlaying(true);
-                        setCurrentAudio(sermonUrl);
-                        setSermonPlaying(sermon);
+                        // console.log(currentAudio)
+
+                        // setCurrentAudio(sermonUrl);
+                        // setSermonPlaying(sermon);
                     })
                     .catch((error) => {
                         alert("Error: Unable to play the audio. Please check your connection.");
@@ -348,7 +397,6 @@ const Sermon = () => {
             setIsPlaying(!isPlaying);
         }
     };
-
 
 
 
@@ -401,8 +449,10 @@ const Sermon = () => {
 
     useEffect(() => {
         const updateProgress = () => {
-            const currentProgress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-            setProgress(currentProgress);
+            if (audioPlayer.duration) {
+                const currentProgress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                setProgress(currentProgress);
+            }
         };
 
         audioPlayer.addEventListener('timeupdate', updateProgress);

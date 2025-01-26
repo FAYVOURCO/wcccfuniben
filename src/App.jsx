@@ -65,7 +65,7 @@ function App() {
         <Routes>
           <Route path='*' element={ <FourOFour/>} />
           <Route path="/" element={<LandingPage />} />
-          <Route path="/sermon" element={<Sermon />} />
+          <Route path="/sermon/:sermonId?" element={<Sermon />} />
           <Route path="/prayer-library" element={<PrayerLibrary />} />
           <Route path="/trivia" element={<BibleTrivia />} />
           <Route path="/about-us" element={<AboutUs />} />
